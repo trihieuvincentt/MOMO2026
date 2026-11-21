@@ -4,14 +4,18 @@
 
 **Goal:** Deliver the ScamGuard seven-capability MVP as a safe, repeatable end-to-end investigation workflow.
 
-**Architecture:** React/TypeScript frontend calls a Python/FastAPI backend. Backend owns validation, OCR, scanner orchestration, deterministic risk aggregation, report assembly, Gemini calls, reputation-provider integration, and optional persistence/RAG. Shared Pydantic contracts preserve evidence provenance from ingestion through report. No arbitrary URL fetching is permitted.
+**Architecture:** A public HTTPS React/TypeScript frontend calls a public FastAPI backend. Backend owns validation, OCR, scanner orchestration, Gemini Investigation Engine calls, deterministic risk aggregation, report assembly, reputation-provider integration, session/case isolation, rate limits, and optional persistence/RAG. Shared Pydantic contracts preserve evidence provenance from ingestion through report. No arbitrary URL fetching is permitted. Development may run locally, but the submitted system must run on managed public infrastructure and must not depend on developer-local files or services.
 
-**Tech Stack:** Proposed baseline: Python 3.12+, FastAPI, Pydantic, pytest; React + TypeScript + Vite, Vitest; PaddleOCR (proof-of-fit required); Gemini API behind adapter; PostgreSQL/Qdrant optional. Confirm versions, deployment target, and provider availability before implementation.
+**Tech Stack:** Proposed baseline: Python 3.12+, FastAPI, Pydantic, pytest; React + TypeScript + Vite, Vitest; PaddleOCR (proof-of-fit required); Gemini API behind adapter; PostgreSQL/Redis optional for public case/rate-limit state; Qdrant optional. Confirm hosting, domain, provider quotas, and deployment target before implementation.
 
 **Spec:** `../specs/2026-11-20-scamguard-mvp-design.md`
 
 ## Global Constraints
 
+- Development may run locally, but the submitted product must be reachable through a public HTTPS URL without local setup.
+- Anonymous case IDs are opaque and isolated; add rate limits, upload/request/concurrency limits, and bounded provider timeouts.
+- Gemini is the core investigation/explanation layer over structured scanner evidence; its outputs require schema and evidence-reference validation.
+- Live provider results, unavailable states, and deterministic fixture results are distinct; fixtures are always visibly labeled.
 - Findings include source type, verification status, severity, and evidence reference/excerpt.
 - LLM-generated findings are hypotheses, not externally verified matches.
 - Do not present an unvalidated numeric scam probability.
@@ -37,15 +41,16 @@
 
 The individual plans are independently testable; execute in this dependency order:
 
-1. **Foundation and shared contracts** — create backend/frontend skeleton, configuration, schemas, health route, test harness. This is a prerequisite task in this plan, not a separate feature plan.
+1. **Foundation and shared contracts** — create backend/frontend skeleton, configuration, schemas, health route, test harness, and public-deployment configuration boundaries. This is a prerequisite task in this plan, not a separate feature plan.
 2. **Message Scanner** — establish normalized Finding and scanner contracts.
 3. **URL Scanner** — implement parsing and reputation adapter without fetching submitted pages.
 4. **Screenshot OCR** — run PaddleOCR proof-of-fit; expose editable extraction flow.
-5. **Investigation Case** — aggregate evidence and scanner outputs, preserving provenance.
-6. **Explainable Risk Assessment** — deterministic policy over validated findings.
-7. **Investigation Report** — user-facing report from case, risk, and recommendation contracts.
-8. **AI Security Advisor** — case-grounded Q&A and curated guidance retrieval, after case/report contracts stabilize.
-9. **End-to-end hardening and demo** — regression/evaluation set, fixture labeling, deployment, privacy checks, rehearsed demo and recorded backup.
+5. **Investigation Case** — aggregate evidence and scanner outputs, preserving provenance and anonymous case isolation.
+6. **Gemini Investigation Engine** — interpret structured evidence and produce schema-validated, evidence-grounded explanations and supported cross-item findings.
+7. **Explainable Risk Assessment** — deterministic policy over validated findings.
+8. **Investigation Report** — user-facing report from case, risk, and recommendation contracts.
+9. **AI Security Advisor** — case-grounded Q&A and curated guidance retrieval, after case/report contracts stabilize.
+10. **Public deployment and end-to-end hardening** — HTTPS hosting, health checks, rate limits, privacy checks, live/fixture mode labeling, evaluation, rehearsed demo, and recorded backup.
 
 ## Proposed repository structure
 
@@ -87,7 +92,20 @@ data/evaluation/
 
 Execute the seven linked plans in the order above, preserving their interfaces and acceptance tests. Each feature plan ends with a testable deliverable and commit. Do not start a downstream integration before its upstream contract exists.
 
-### Task 3: Integrate the investigation journey
+### Task 3: Implement the Gemini Investigation Engine
+
+**Files:** Create `backend/app/schemas/investigation.py`, `backend/app/services/investigation_engine.py`, `backend/app/adapters/gemini.py`, `backend/tests/test_investigation_engine.py`.
+
+**Interfaces:** `investigate_case(case: Case, model: InvestigationModel) -> InvestigationResult`; model receives structured scanner findings and returns schema-validated explanations, supported relationships, unknowns, and evidence references.
+
+- [ ] Write tests for message+URL interpretation, unrelated evidence, invalid evidence reference, malformed model output, provider timeout, and degraded rule-only mode.
+- [ ] Verify tests fail before implementation.
+- [ ] Implement a backend-only Gemini adapter with bounded timeout; separate untrusted evidence blocks from system instructions; validate every finding/reference against the case.
+- [ ] Ensure the engine never invents reputation results or claims a URL/account was checked without a real tool result.
+- [ ] Run `pytest backend/tests/test_investigation_engine.py -q`; expect pass with mocked model.
+- [ ] Commit `feat: add grounded Gemini investigation engine`.
+
+### Task 4: Integrate the investigation journey
 
 **Files:** Create `backend/app/api/routes/cases.py`, `backend/tests/integration/test_investigation_flow.py`, `frontend/src/features/investigation/InvestigationPage.tsx`, `frontend/src/features/investigation/InvestigationPage.test.tsx`.
 
@@ -99,7 +117,7 @@ Execute the seven linked plans in the order above, preserving their interfaces a
 - [ ] Run `pytest backend/tests -q` and frontend test command; expected pass.
 - [ ] Commit `feat: integrate investigation workflow`.
 
-### Task 4: Build evaluation fixtures and verify safety behavior
+### Task 5: Build evaluation fixtures and verify safety behavior
 
 **Files:** Create `data/evaluation/cases.jsonl`, `backend/tests/evaluation/test_evaluation_cases.py`, `docs/demo-runbook.md`.
 
@@ -108,15 +126,17 @@ Execute the seven linked plans in the order above, preserving their interfaces a
 - [ ] Run evaluation and record per-case outcomes, false positives/negatives, and limitations; do not claim statistical representativeness.
 - [ ] Commit `test: add scamguard evaluation fixtures`.
 
-### Task 5: Operational readiness and demo
+### Task 6: Operational readiness, public deployment, and judge demo
 
-**Files:** Modify deployment configuration and README; create `.env.example` without secrets, `docs/privacy-and-retention.md`, `docs/demo-runbook.md`.
+**Files:** Modify deployment configuration and README; create `.env.example` without secrets, `docs/privacy-and-retention.md`, `docs/demo-runbook.md`, `deployment/`, and public smoke tests.
 
-- [ ] Verify app starts with external providers disabled and shows unavailable states.
-- [ ] Verify configured providers use server-side credentials and timeouts.
+- [ ] Select a hosting target that supports public HTTPS frontend/backend deployment and document the target, URL, environment variables, build/start commands, and health-check path.
+- [ ] Verify app starts with external providers disabled and shows unavailable states; verify live mode and visibly labeled fixture mode are distinct.
+- [ ] Verify configured providers use server-side credentials, bounded timeouts, rate limits, upload/request/concurrency limits, and anonymous case isolation.
+- [ ] Deploy to staging/public URL and test the complete judge flow from a clean browser and a second device/network without local setup.
 - [ ] Run complete demo twice, once with live services if available and once with deterministic labeled fixtures.
-- [ ] Confirm temporary image cleanup, redacted logs, known limitations, and backup recording.
-- [ ] Commit `docs: prepare reproducible contest demo`.
+- [ ] Confirm HTTPS, temporary image cleanup, redacted logs, privacy notice, known limitations, and backup recording.
+- [ ] Commit `docs: prepare reproducible public contest demo`.
 
 ## Feature plans
 

@@ -16,7 +16,7 @@
 - Co-submission alone does not prove evidence is related.
 - Partial scanner failure preserves successful results and exposes failed status.
 - Case IDs must not encode secrets/personal data.
-- Session-scoped mode is acceptable for MVP unless persistence is approved.
+- Session/public mode must use opaque IDs, isolate cases between anonymous users, and apply bounded retention; session-scoped mode is acceptable for MVP unless persistent public state is approved.
 
 ## Review Focus
 

@@ -4,7 +4,7 @@
 
 **Goal:** Analyze user-provided Vietnamese/English message text and return validated, evidence-linked scam indicators.
 
-**Architecture:** FastAPI route validates input, scanner service applies deterministic checks and calls Gemini through an adapter, and Pydantic validates output. Model output is treated as a hypothesis; exact excerpts must map back to input.
+**Architecture:** FastAPI route validates input, scanner service applies deterministic checks and calls Gemini through an adapter, and Pydantic validates output. Message findings become structured evidence for the Gemini Investigation Engine; model output is treated as a hypothesis and exact excerpts must map back to input.
 
 **Tech Stack:** Python 3.12+, FastAPI, Pydantic, pytest; Gemini API through server-side adapter.
 

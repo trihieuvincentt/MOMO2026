@@ -4,7 +4,7 @@
 
 **Goal:** Parse submitted URLs safely and report reputation status without implying an unverified URL is safe.
 
-**Architecture:** A pure parser/normalizer produces URL observations; an injected reputation adapter performs a bounded lookup. The service never downloads the submitted page or follows redirects.
+**Architecture:** A pure parser/normalizer produces URL observations; an injected reputation adapter performs a bounded lookup. The service never downloads the submitted page or follows redirects. Structured URL results are passed to the Gemini Investigation Engine for grounded explanation and cross-evidence interpretation; Gemini cannot invent reputation results.
 
 **Tech Stack:** Python 3.12+, FastAPI, Pydantic, pytest; selected trusted reputation provider adapter (provider choice gated).
 

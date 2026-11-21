@@ -10,6 +10,10 @@ ScamGuard AI helps a person assess a suspicious digital interaction before sendi
 
 The MVP is for a contest demonstration by a small team. Success means a repeatable end-to-end investigation can be demonstrated, including at least two evidence types, with useful explanations and honest limitations. It is not a production fraud-detection authority.
 
+The submitted product must be a publicly reachable online service. A judge must be able to open a URL, create an investigation, submit evidence, receive a report, and ask the Advisor without running local code, configuring API keys, or preparing a local database. Development may run locally, but local-only operation is not an acceptable submission mode.
+
+AI is a core value-producing component: deterministic parsers and reputation/OCR tools collect signals, while Gemini performs grounded investigation, cross-evidence interpretation, explanation, and case-aware guidance. Rules remain responsible for transparent risk aggregation and must constrain, not replace, evidence-grounded AI behavior.
+
 ## 2. Product goals
 
 - Accept message text, URLs, and screenshots as evidence.
@@ -45,22 +49,25 @@ The MVP is for a contest demonstration by a small team. Success means a repeatab
 ### Confirmed from the source plan or conversation
 
 - MVP consists of seven capabilities described in Sections 6–12.
-- Gemini is the proposed language-model API for message analysis and Advisor behavior.
+- Gemini is the proposed language-model API for message analysis, grounded investigation, explanation, and Advisor behavior; it is not merely an optional chatbot.
 - The user chose a separate OCR stage rather than sending the screenshot directly to Gemini. PaddleOCR is the proposed local OCR implementation; Vietnamese and English support must be tested before treating it as a supported guarantee.
 - OCR text should be shown for user review/correction before analysis.
 - Risk aggregation should be transparent and rule-based, not a model-invented probability.
 - URL reputation lookup may use a trusted provider; demo fixtures are acceptable only when clearly labeled.
 - The existing source plan suggests React/Next.js, FastAPI, PostgreSQL, and optionally Qdrant, but does not make them final choices.
+- The final submission must be deployed online over HTTPS and usable by judges without local setup.
 
 ### Specification defaults proposed for approval
 
-- No user account/authentication is required for the contest MVP unless the competition rules or deployment needs require it.
+- No user account/authentication is required for the contest MVP unless the competition rules or deployment needs require it; anonymous cases must still be isolated by opaque server-generated IDs.
 - A case is scoped to the current browser session or a generated case identifier; durable history is optional and not a core acceptance requirement.
 - The backend owns provider credentials and all third-party calls. The frontend never receives API keys.
 - The application does not download page content for arbitrary URLs. URL analysis is parsing plus a reputation lookup or a clearly labeled unavailable/fixture result.
 - If a provider is not configured or fails, return an explicit `unavailable`/`error` status and continue with other evidence where possible.
 - The knowledge base is a small, curated set of safety guidance. Retrieval/vector infrastructure is implementation detail and may be omitted if it endangers the core workflow.
 - User-submitted evidence is retained only as long as required for the active case/demo; persistent retention and deployment privacy terms must be decided before public release.
+- Public deployment uses HTTPS, server-side environment secrets, health checks, bounded timeouts, rate limits, upload/request limits, and CORS or same-origin configuration.
+- The public demo must provide a live mode for configured providers and a visibly labeled deterministic fixture mode for outages or rehearsals; it must never silently present fixture results as live lookups.
 
 ### Unverified constraint
 
@@ -73,9 +80,14 @@ The contest-rules PDF in `D:\MOMO2026` could not be rendered in the available en
 3. For screenshots, the system extracts text and lets the user review/edit it before analysis.
 4. Each scanner returns structured findings with evidence references, source, and verification state.
 5. The investigation service associates findings with evidence items. It may link items only when there is a concrete basis (for example, the submitted message contains the same URL); otherwise it must preserve them as separate items.
-6. A deterministic risk policy aggregates supported findings and records which findings contributed.
-7. The report displays risk category, findings, evidence, unknowns, limitations, and prioritized next steps.
-8. The Advisor answers a follow-up using case findings and retrieved curated guidance; it must not claim checks that were not performed.
+6. Gemini Investigation Engine interprets the validated scanner evidence and case context. It may explain signals, identify supported cross-evidence relationships, and state uncertainty, but it cannot invent provider results or override evidence provenance.
+7. A deterministic risk policy aggregates supported findings and records which findings contributed.
+8. The report displays risk category, findings, evidence, unknowns, limitations, and prioritized next steps.
+9. The Advisor answers a follow-up using case findings and retrieved curated guidance; it must not claim checks that were not performed.
+
+### AI investigation boundary
+
+Gemini is the central interpretation layer, not a replacement for evidence tools. The backend sends structured evidence from Message Scanner, URL Scanner, OCR-confirmed text, and reputation results. Gemini returns schema-validated investigation findings and explanations whose evidence references must resolve to the supplied case. The final risk category remains deterministic and transparent. If Gemini is unavailable, the system exposes a degraded state and may show rule-based findings; it must not silently claim that the full AI investigation completed.
 
 ### Shared finding contract
 
@@ -134,6 +146,7 @@ Assess URL structure and, where configured, query a trusted reputation service w
 - Query an approved reputation provider through the backend when configured.
 - Do not retrieve arbitrary page content or follow redirects in the MVP.
 - Provider responses must be mapped to `verified_match`, `no_signal_found`, `unverified`, or `unavailable/error` with provider and timestamp metadata as appropriate.
+- Gemini Investigation Engine may interpret these structured URL observations together with related case evidence, but it cannot replace the reputation lookup or invent a reputation result.
 - Fixtures are allowed for deterministic demos only if the response is visibly marked as demo/test data.
 
 ### Output
@@ -271,6 +284,10 @@ Present scanner and Advisor-relevant results as a readable report a user can act
 - No arbitrary server-side URL fetching in this MVP.
 - Do not log raw message/image content, secrets, or credentials by default; redact sensitive values where feasible.
 - Explicit provider timeout/error states and safe fallback behavior.
+- Public submission runs behind HTTPS and provides a judge-accessible URL; it must not require local code, local files, or developer-only services.
+- Anonymous cases use opaque IDs and are isolated between users; apply request, upload, and concurrency limits plus rate limiting.
+- Configure health checks, bounded timeouts, CORS or same-origin policy, and server-side environment secrets for the deployed service.
+- Provide live mode for configured providers and visibly labeled fixture mode for outages/rehearsal; never silently substitute fixture results for live results.
 - Treat model and retrieved text as untrusted; use structured outputs and validation.
 - Make retention and deletion behavior clear before any public deployment.
 - Accessible, understandable error and uncertainty language in the UI.
@@ -285,6 +302,11 @@ The MVP is acceptable for demo when a user can:
 - See a transparent overall risk category with unknowns and limitations.
 - Ask a case-related question and receive appropriately grounded safety advice.
 - View a report with concrete next steps.
+- Use the product from a public HTTPS URL without installing software, running local code, configuring API keys, or preparing a database.
+- Use an anonymous case without being able to access another user's case.
+- Observe explicit live, unavailable, and fixture modes; fixture results are visibly labeled and never silently substituted.
+- Complete a useful flow when one optional external provider fails.
+- Experience Gemini as the core investigation/explanation layer, with schema-validated evidence references and a visible degraded state if Gemini is unavailable.
 - Repeat the demo using deterministic test data when external APIs are unavailable, with fixture data visibly labeled.
 
 The demo dataset should include benign, suspicious, and ambiguous scenarios, plus malformed URL, reputation-service failure, poor-quality screenshot, unrelated evidence items, and a sensitive-credential handling case. Dataset size and metrics should be set in the subsequent implementation plan after the contest requirements and available time are confirmed.

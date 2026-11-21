@@ -4,7 +4,7 @@
 
 **Goal:** Answer case-related safety questions using actual case findings and curated guidance, while clearly identifying uncertainty and source support.
 
-**Architecture:** Advisor service fetches case context and retrieves a small curated knowledge corpus; Gemini generates a constrained answer with source IDs. Backend validates citations against retrieved passages. Tool calls are limited to implemented backend capabilities.
+**Architecture:** Advisor service fetches case context and retrieves a small curated knowledge corpus; Gemini generates a constrained answer with source IDs. The same backend Gemini adapter/policy used by the Investigation Engine is reused here, so AI remains central across investigation and follow-up. Backend validates citations against retrieved passages. Tool calls are limited to implemented backend capabilities.
 
 **Tech Stack:** Python 3.12+, FastAPI, Pydantic, pytest; Gemini API adapter; simple keyword retrieval first, optional embeddings/Qdrant only if approved and time permits.
 
