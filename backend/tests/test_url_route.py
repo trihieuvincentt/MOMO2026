@@ -25,7 +25,9 @@ def test_url_endpoint_returns_explicit_fixture_result():
 
 
 def test_url_endpoint_reports_provider_unavailable_without_configuration(monkeypatch):
-    monkeypatch.delenv("GOOGLE_WEB_RISK_API_KEY", raising=False)
+    monkeypatch.delenv("VIRUSTOTAL_API_KEY", raising=False)
+    monkeypatch.delenv("URLHAUS_API_KEY", raising=False)
+    monkeypatch.delenv("URLHAUS_AUTH_KEY", raising=False)
 
     response = client.post("/api/v1/url/analyze", json={"url": "https://example.com"})
 

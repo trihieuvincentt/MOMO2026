@@ -13,11 +13,25 @@ class CaseStatus(StrEnum):
     ERROR = "error"
 
 
+class EvidenceScanStatus(StrEnum):
+    SUCCESS = "success"
+    UNAVAILABLE = "unavailable"
+    ERROR = "error"
+
+
+class EvidenceRelationship(BaseModel):
+    source_evidence_id: str
+    target_evidence_id: str
+    basis: str
+
+
 class Case(BaseModel):
     id: str
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     status: CaseStatus = CaseStatus.OPEN
     overall_risk: str | None = None
     summary: str | None = None
-    evidence: list[EvidenceItem] = []
-    findings: list[Finding] = []
+    evidence: list[EvidenceItem] = Field(default_factory=list)
+    findings: list[Finding] = Field(default_factory=list)
+    scanner_statuses: dict[str, EvidenceScanStatus] = Field(default_factory=dict)
+    relationships: list[EvidenceRelationship] = Field(default_factory=list)

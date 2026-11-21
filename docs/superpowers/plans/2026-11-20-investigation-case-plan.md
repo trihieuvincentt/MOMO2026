@@ -6,6 +6,8 @@
 
 **Architecture:** A case service owns evidence lifecycle and scanner orchestration. Evidence and findings are linked by identifiers; a relationship is recorded only with explicit support. Persistence is optional for MVP and must be decided before deployment.
 
+**Current MVP persistence ruling:** The first vertical slice uses an in-memory repository. Cases are isolated by opaque generated IDs during the running process, but restart clears case state; public deployment must add a session-scoped store or PostgreSQL before relying on durable judge sessions.
+
 **Tech Stack:** FastAPI, Pydantic, pytest; PostgreSQL only if persistent case history is selected; React/TypeScript.
 
 **Spec:** `../specs/2026-11-20-scamguard-mvp-design.md`, Section 9
@@ -34,10 +36,10 @@
 
 **Interfaces:** `create_case() -> Case`; `add_evidence(case_id: str, item: EvidenceItemInput) -> EvidenceItem`; `get_case(case_id: str) -> Case`; `Case` includes evidence, findings, scanner statuses, and supported relationships.
 
-- [ ] Test create, add evidence, invalid case, duplicate policy, provenance links, and unrelated evidence.
-- [ ] Implement in-memory repository for first testable vertical slice and explicit repository interface.
-- [ ] Run case service tests; expect pass.
-- [ ] Commit `feat: model investigation cases and evidence`.
+- [x] Test create, add evidence, invalid case, duplicate policy, provenance links, and unrelated evidence.
+- [x] Implement in-memory repository for first testable vertical slice and explicit repository interface.
+- [x] Run case service tests; expect pass.
+- [x] Commit `feat: model investigation cases and evidence`.
 
 ### Task 2: Orchestrate scanners with partial-failure behavior
 
@@ -45,11 +47,11 @@
 
 **Interfaces:** `analyze_case(case_id: str, scanners: ScannerRegistry) -> CaseAnalysisResult`; registry returns typed per-evidence result/status.
 
-- [ ] Test message+URL analysis, OCR-confirmed text association, scanner timeout/error, and no unsupported correlation.
-- [ ] Implement orchestration with injected scanners; persist each successful result and explicit status independently.
-- [ ] Add only deterministic links supported by exact shared value or explicit user relationship; record link basis.
-- [ ] Run case tests; expect pass.
-- [ ] Commit `feat: orchestrate case evidence analysis`.
+- [x] Test message+URL analysis, OCR-confirmed text association, scanner timeout/error, and no unsupported correlation.
+- [x] Implement orchestration with injected scanners; persist each successful result and explicit status independently.
+- [x] Add only deterministic links supported by exact shared value or explicit user relationship; record link basis.
+- [x] Run case tests; expect pass.
+- [x] Commit `feat: orchestrate case evidence analysis`.
 
 ### Task 3: API and optional persistence boundary
 
@@ -57,8 +59,8 @@
 
 **Interfaces:** `POST /api/v1/cases`, `POST /api/v1/cases/{case_id}/evidence`, `POST /api/v1/cases/{case_id}/analyze`, `GET /api/v1/cases/{case_id}`.
 
-- [ ] Test valid lifecycle, invalid IDs/payloads, partial failures, and isolation between generated case IDs.
-- [ ] Implement route layer over repository interface; default in-memory mode unless persistent store selected.
-- [ ] If PostgreSQL chosen, add migration and repository integration tests; otherwise document restart/session limitation.
-- [ ] Run API and full backend tests; expect pass.
-- [ ] Commit `feat: expose investigation case workflow`.
+- [x] Test valid lifecycle, invalid IDs/payloads, partial failures, and isolation between generated case IDs.
+- [x] Implement route layer over repository interface; default in-memory mode unless persistent store selected.
+- [x] If PostgreSQL chosen, add migration and repository integration tests; otherwise document restart/session limitation.
+- [x] Run API and full backend tests; expect pass.
+- [x] Commit `feat: expose investigation case workflow`.
