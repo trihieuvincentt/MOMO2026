@@ -8,7 +8,7 @@
 
 **Tech Stack:** FastAPI, Pydantic, pytest; PostgreSQL only if persistent case history is selected; React/TypeScript.
 
-**Spec:** `D:\MOMO2026\scamguard-mvp-spec.md`, Section 9
+**Spec:** `../specs/2026-11-20-scamguard-mvp-design.md`, Section 9
 
 ## Global Constraints
 

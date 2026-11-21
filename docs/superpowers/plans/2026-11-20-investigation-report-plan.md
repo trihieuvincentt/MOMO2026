@@ -8,7 +8,7 @@
 
 **Tech Stack:** FastAPI, Pydantic, pytest; React/TypeScript, Vitest.
 
-**Spec:** `D:\MOMO2026\scamguard-mvp-spec.md`, Section 12
+**Spec:** `../specs/2026-11-20-scamguard-mvp-design.md`, Section 12
 
 ## Global Constraints
 

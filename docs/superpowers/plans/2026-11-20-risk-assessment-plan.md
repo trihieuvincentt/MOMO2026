@@ -8,7 +8,7 @@
 
 **Tech Stack:** Python 3.12+, Pydantic, pytest.
 
-**Spec:** `D:\MOMO2026\scamguard-mvp-spec.md`, Section 10
+**Spec:** `../specs/2026-11-20-scamguard-mvp-design.md`, Section 10
 
 ## Global Constraints
 

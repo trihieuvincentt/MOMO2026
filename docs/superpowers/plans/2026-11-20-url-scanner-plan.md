@@ -8,7 +8,7 @@
 
 **Tech Stack:** Python 3.12+, FastAPI, Pydantic, pytest; selected trusted reputation provider adapter (provider choice gated).
 
-**Spec:** `D:\MOMO2026\scamguard-mvp-spec.md`, Section 7
+**Spec:** `../specs/2026-11-20-scamguard-mvp-design.md`, Section 7
 
 ## Global Constraints
 

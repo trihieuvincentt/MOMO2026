@@ -8,7 +8,7 @@
 
 **Tech Stack:** Python 3.12+, FastAPI, Pydantic, pytest; Gemini API through server-side adapter.
 
-**Spec:** `D:\MOMO2026\scamguard-mvp-spec.md`, Section 6
+**Spec:** `../specs/2026-11-20-scamguard-mvp-design.md`, Section 6
 
 ## Global Constraints
 

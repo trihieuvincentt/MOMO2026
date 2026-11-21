@@ -8,7 +8,7 @@
 
 **Tech Stack:** Proposed baseline: Python 3.12+, FastAPI, Pydantic, pytest; React + TypeScript + Vite, Vitest; PaddleOCR (proof-of-fit required); Gemini API behind adapter; PostgreSQL/Qdrant optional. Confirm versions, deployment target, and provider availability before implementation.
 
-**Spec:** `D:\MOMO2026\scamguard-mvp-spec.md`
+**Spec:** `../specs/2026-11-20-scamguard-mvp-design.md`
 
 ## Global Constraints
 
@@ -120,13 +120,13 @@ Execute the seven linked plans in the order above, preserving their interfaces a
 
 ## Feature plans
 
-- Message Scanner: `D:\MOMO2026\plans\2026-11-20-message-scanner-plan.md`
-- URL Scanner: `D:\MOMO2026\plans\2026-11-20-url-scanner-plan.md`
-- Screenshot OCR: `D:\MOMO2026\plans\2026-11-20-screenshot-ocr-plan.md`
-- Investigation Case: `D:\MOMO2026\plans\2026-11-20-investigation-case-plan.md`
-- Explainable Risk Assessment: `D:\MOMO2026\plans\2026-11-20-risk-assessment-plan.md`
-- AI Security Advisor: `D:\MOMO2026\plans\2026-11-20-ai-security-advisor-plan.md`
-- Investigation Report: `D:\MOMO2026\plans\2026-11-20-investigation-report-plan.md`
+- Message Scanner: `2026-11-20-message-scanner-plan.md`
+- URL Scanner: `2026-11-20-url-scanner-plan.md`
+- Screenshot OCR: `2026-11-20-screenshot-ocr-plan.md`
+- Investigation Case: `2026-11-20-investigation-case-plan.md`
+- Explainable Risk Assessment: `2026-11-20-risk-assessment-plan.md`
+- AI Security Advisor: `2026-11-20-ai-security-advisor-plan.md`
+- Investigation Report: `2026-11-20-investigation-report-plan.md`
 
 ## Self-review
 

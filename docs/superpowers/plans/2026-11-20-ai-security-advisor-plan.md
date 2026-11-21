@@ -8,7 +8,7 @@
 
 **Tech Stack:** Python 3.12+, FastAPI, Pydantic, pytest; Gemini API adapter; simple keyword retrieval first, optional embeddings/Qdrant only if approved and time permits.
 
-**Spec:** `D:\MOMO2026\scamguard-mvp-spec.md`, Section 11
+**Spec:** `../specs/2026-11-20-scamguard-mvp-design.md`, Section 11
 
 ## Global Constraints
 

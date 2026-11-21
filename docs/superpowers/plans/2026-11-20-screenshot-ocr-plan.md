@@ -8,7 +8,7 @@
 
 **Tech Stack:** Python 3.12+, FastAPI, Pydantic, pytest; PaddleOCR/model selected after spike; React/TypeScript, Vitest.
 
-**Spec:** `D:\MOMO2026\scamguard-mvp-spec.md`, Section 8
+**Spec:** `../specs/2026-11-20-scamguard-mvp-design.md`, Section 8
 
 ## Global Constraints
 
