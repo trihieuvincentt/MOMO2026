@@ -1,8 +1,12 @@
-import argparse
 import json
 import os
+import sys
 import time
 from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 
 def _peak_rss_mb() -> float | None:
@@ -20,31 +24,37 @@ def _peak_rss_mb() -> float | None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Measure PaddleOCR startup and per-image latency")
-    parser.add_argument("images", nargs="*", type=Path)
+    import argparse
+
+    from backend.app.adapters.ocr_engine import PaddleOCREngine
+
+    parser = argparse.ArgumentParser(description="Measure PaddleOCR startup and latency")
+    parser.add_argument("images", nargs="+", type=Path)
     parser.add_argument("--language", default="en")
     args = parser.parse_args()
 
+    engine = PaddleOCREngine()
     started = time.perf_counter()
-    try:
-        from paddleocr import PaddleOCR
-    except ImportError as exc:
-        raise SystemExit("PaddleOCR is not installed; proof-of-fit was not run.") from exc
-
-    engine = PaddleOCR(lang=args.language, use_textline_orientation=True)
+    engine._get_engine(args.language)
     startup_seconds = time.perf_counter() - started
-    results = []
-    for image_path in args.images:
+
+    requests = []
+    for image in args.images:
         request_started = time.perf_counter()
-        engine.predict(str(image_path))
-        results.append({"image": image_path.name, "latency_seconds": time.perf_counter() - request_started})
+        result = engine.extract(image, args.language)
+        requests.append({
+            "image": image.name,
+            "latency_seconds": time.perf_counter() - request_started,
+            "text_chars": len(result.text),
+            "warning_count": len(result.warnings),
+        })
 
     print(json.dumps({
         "ocr_source": "paddleocr",
         "startup_seconds": startup_seconds,
-        "peak_rss_mb": _peak_rss_mb(),
-        "model_download_behavior": "record whether first startup downloaded model weights in this environment",
-        "request_results": results,
+        "rss_mb_after_startup": _peak_rss_mb(),
+        "request_results": requests,
+        "model_cache_dir": str(Path.home() / ".paddlex" / "official_models"),
     }, indent=2))
 
 

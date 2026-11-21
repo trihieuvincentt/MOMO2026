@@ -2,8 +2,10 @@ import os
 from pathlib import Path
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from starlette.concurrency import run_in_threadpool
 
 from backend.app.adapters.gemini_vision import GeminiVisionExtractor
+from backend.app.adapters.ocr_engine import PaddleOCREngine
 from backend.app.config import get_investigation_model
 from backend.app.schemas.ocr import OCRExtraction
 from backend.app.services.ocr_service import extract_text_from_image
@@ -11,11 +13,6 @@ from backend.app.services.ocr_service import extract_text_from_image
 router = APIRouter(prefix="/api/v1/ocr", tags=["ocr"])
 MAX_UPLOAD_BYTES = 5 * 1024 * 1024
 TEMP_UPLOAD_DIR = Path(os.getenv("OCR_TEMP_DIR", ".tmp/ocr"))
-
-
-class PaddleUnavailable:
-    def extract(self, image_path, language_hint=None):
-        raise RuntimeError("PaddleOCR is not configured")
 
 
 def get_ocr_engines():
@@ -26,10 +23,9 @@ def get_ocr_engines():
             api_key=os.getenv("GEMINI_API_KEY", ""),
             model_name=os.getenv("GEMINI_MODEL", "gemini-3.8-flash"),
         )
-    paddle = PaddleUnavailable()
     if os.getenv("OCR_ENGINE", "paddleocr").strip().lower() == "gemini_vision":
-        return PaddleUnavailable(), gemini
-    return paddle, gemini
+        return None, gemini
+    return PaddleOCREngine(), gemini
 
 
 @router.post("/extract", response_model=OCRExtraction)
@@ -42,7 +38,8 @@ async def extract_ocr_route(
         raise HTTPException(status_code=413, detail="Image exceeds the maximum upload size")
     paddle, gemini = get_ocr_engines()
     try:
-        return extract_text_from_image(
+        return await run_in_threadpool(
+            extract_text_from_image,
             image_bytes,
             filename=image.filename or "upload.png",
             language_hint=language_hint,
