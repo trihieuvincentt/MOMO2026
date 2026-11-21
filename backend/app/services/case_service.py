@@ -3,12 +3,15 @@ from dataclasses import dataclass
 from secrets import token_urlsafe
 from typing import Callable, Protocol
 
-from backend.app.config import get_reputation_provider
+from backend.app.config import get_investigation_model, get_reputation_provider
 from backend.app.schemas.case import Case, CaseStatus, EvidenceScanStatus, EvidenceRelationship
 from backend.app.schemas.evidence import EvidenceItem, EvidenceType
 from backend.app.schemas.finding import Finding
+from backend.app.schemas.investigation import InvestigationResult, InvestigationStatus
 from backend.app.schemas.message import MessageScanRequest, MessageScanResult, ScannerStatus
 from backend.app.schemas.url import URLScanResult
+from backend.app.schemas.investigation import InvestigationStatus, InvestigationResult
+from backend.app.services.investigation_engine import InvestigationModel, investigate_case
 from backend.app.services.message_scanner import analyze_message
 from backend.app.services.recommendation_catalog import recommend_actions
 from backend.app.services.risk_assessor import assess_risk
@@ -53,6 +56,7 @@ def _default_url_scanner(value: str) -> URLScanResult:
 class ScannerRegistry:
     message: Callable[[str], MessageScanResult] = _default_message_scanner
     url: Callable[[str], URLScanResult] = _default_url_scanner
+    investigation_model: InvestigationModel | None = None
 
 
 @dataclass(frozen=True)
@@ -169,6 +173,16 @@ def analyze_case(
     )
     case.overall_risk = case.risk_assessment.category.value
     case.summary = case.risk_assessment.explanation
+    investigation_model = registry.investigation_model or get_investigation_model()
+    if investigation_model is None:
+        case.investigation = InvestigationResult(
+            status=InvestigationStatus.DEGRADED,
+            summary="Gemini investigation is disabled; showing deterministic findings only.",
+            unknowns=["AI interpretation was not enabled for this analysis."],
+            limitations=["Set GEMINI_ENABLED=true to enable the server-side Gemini investigation engine."],
+        )
+    else:
+        case.investigation = investigate_case(case, investigation_model)
     case.status = CaseStatus.ANALYZED if successful else CaseStatus.ERROR
     repository.save(case)
     return CaseAnalysisResult(case=deepcopy(case))

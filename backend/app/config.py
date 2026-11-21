@@ -29,6 +29,8 @@ def get_reputation_provider() -> ReputationProvider | None:
 
 
 def get_investigation_model() -> GeminiInvestigationModel | None:
+    if os.getenv("GEMINI_ENABLED", "false").strip().lower() not in {"1", "true", "yes", "on"}:
+        return None
     api_key = os.getenv("GEMINI_API_KEY", "")
     if not api_key.strip():
         return None

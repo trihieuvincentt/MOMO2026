@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 
 from backend.app.schemas.evidence import EvidenceItem
 from backend.app.schemas.finding import Finding
+from backend.app.schemas.investigation import InvestigationResult
 from backend.app.schemas.risk import RiskAssessment
 
 
@@ -37,3 +38,4 @@ class Case(BaseModel):
     scanner_statuses: dict[str, EvidenceScanStatus] = Field(default_factory=dict)
     relationships: list[EvidenceRelationship] = Field(default_factory=list)
     risk_assessment: RiskAssessment | None = None
+    investigation: InvestigationResult | None = None
