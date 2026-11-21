@@ -98,12 +98,12 @@ Execute the seven linked plans in the order above, preserving their interfaces a
 
 **Interfaces:** `investigate_case(case: Case, model: InvestigationModel) -> InvestigationResult`; model receives structured scanner findings and returns schema-validated explanations, supported relationships, unknowns, and evidence references.
 
-- [ ] Write tests for message+URL interpretation, unrelated evidence, invalid evidence reference, malformed model output, provider timeout, and degraded rule-only mode.
-- [ ] Verify tests fail before implementation.
-- [ ] Implement a backend-only Gemini adapter with bounded timeout; separate untrusted evidence blocks from system instructions; validate every finding/reference against the case.
-- [ ] Ensure the engine never invents reputation results or claims a URL/account was checked without a real tool result.
-- [ ] Run `pytest backend/tests/test_investigation_engine.py -q`; expect pass with mocked model.
-- [ ] Commit `feat: add grounded Gemini investigation engine`.
+- [x] Write tests for message+URL interpretation, unrelated evidence, invalid evidence reference, malformed model output, provider timeout, and degraded rule-only mode.
+- [x] Verify tests fail before implementation.
+- [x] Implement a backend-only Gemini adapter with bounded timeout; separate untrusted evidence blocks from system instructions; validate every finding/reference against the case.
+- [x] Ensure the engine never invents reputation results or claims a URL/account was checked without a real tool result.
+- [x] Run `pytest backend/tests/test_investigation_engine.py -q`; expect pass with mocked model.
+- [x] Commit `feat: add grounded Gemini investigation engine`.
 
 ### Task 4: Integrate the investigation journey
 

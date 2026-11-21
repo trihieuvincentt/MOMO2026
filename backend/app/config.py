@@ -2,6 +2,7 @@ import os
 
 from dotenv import load_dotenv
 
+from backend.app.adapters.gemini import GeminiInvestigationModel
 from backend.app.adapters.reputation import (
     MultiSourceReputationProvider,
     ReputationProvider,
@@ -25,3 +26,10 @@ def get_reputation_provider() -> ReputationProvider | None:
     if urlhaus_key.strip():
         providers.append(URLhausProvider(urlhaus_key))
     return MultiSourceReputationProvider(providers) if providers else None
+
+
+def get_investigation_model() -> GeminiInvestigationModel | None:
+    api_key = os.getenv("GEMINI_API_KEY", "")
+    if not api_key.strip():
+        return None
+    return GeminiInvestigationModel(api_key)
