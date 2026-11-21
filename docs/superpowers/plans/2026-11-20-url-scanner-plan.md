@@ -34,11 +34,11 @@
 
 **Interfaces:** `URLScanRequest(url: str)`; `URLObservation(normalized_url: str, hostname: str, scheme: str, notes: list[str])`; `parse_submitted_url(raw: str) -> URLObservation`.
 
-- [ ] Test valid HTTP/HTTPS, malformed strings, unsupported schemes, credentials in URL, localhost/private IP, IDN/punycode, and length limit.
-- [ ] Run focused tests; verify they fail.
-- [ ] Implement strict parser and normalization; do not resolve or connect to host.
-- [ ] Run `pytest backend/tests/test_url_parser.py -q`; expect pass.
-- [ ] Commit `feat: parse submitted URLs safely`.
+- [x] Test valid HTTP/HTTPS, malformed strings, unsupported schemes, credentials in URL, localhost/private IP, IDN/punycode, and length limit.
+- [x] Run focused tests; verify they fail.
+- [x] Implement strict parser and normalization; do not resolve or connect to host.
+- [x] Run `pytest backend/tests/test_url_parser.py -q`; expect pass.
+- [x] Commit `feat: parse submitted URLs safely`.
 
 ### Task 2: Reputation adapter and service result
 
@@ -46,11 +46,11 @@
 
 **Interfaces:** `ReputationProvider.lookup(url: str) -> ReputationLookup`; `scan_url(raw: str, provider: ReputationProvider | None, fixture_mode: bool = False) -> URLScanResult`.
 
-- [ ] Test verified match, no match, timeout, provider error, unconfigured provider, and labeled fixture result.
-- [ ] Implement provider interface and map outcomes to verification/status enums; ensure no page-fetch code path exists.
-- [ ] Ensure provider receives only validated normalized URLs and local/private targets are not queried.
-- [ ] Run focused tests; expect pass.
-- [ ] Commit `feat: add URL reputation lookup adapter`.
+- [x] Test verified match, no match, timeout, provider error, unconfigured provider, and labeled fixture result.
+- [x] Implement provider interface and map outcomes to verification/status enums; ensure no page-fetch code path exists.
+- [x] Ensure provider receives only validated normalized URLs and local/private targets are not queried.
+- [x] Run focused tests; expect pass.
+- [x] Commit `feat: add URL reputation lookup adapter`.
 
 ### Task 3: API and user-facing status semantics
 
@@ -58,7 +58,7 @@
 
 **Interfaces:** `POST /api/v1/url/analyze` accepts `URLScanRequest`, returns `URLScanResult` with observation, findings, lookup source/mode, and status.
 
-- [ ] Test invalid URL, live success, fixture mode, and provider outage response.
-- [ ] Implement endpoint with explicit `live`, `fixture`, `unavailable`, or `error` mode.
-- [ ] Run focused and full backend tests; expect pass.
-- [ ] Commit `feat: expose URL assessment endpoint`.
+- [x] Test invalid URL, live success, fixture mode, and provider outage response.
+- [x] Implement endpoint with explicit `live`, `fixture`, `unavailable`, or `error` mode.
+- [x] Run focused and full backend tests; expect pass.
+- [x] Commit `feat: expose URL assessment endpoint`.
