@@ -3,6 +3,7 @@ from dataclasses import dataclass
 import pytest
 
 from backend.app.schemas.finding import VerificationStatus
+from backend.app.adapters.reputation import ReputationLookup
 from backend.app.services.url_scanner import scan_url
 
 
@@ -79,3 +80,21 @@ def test_fixture_result_is_labeled_and_not_presented_as_live():
     assert result.status == "success"
     assert result.mode == "fixture"
     assert "fixture" in " ".join(result.limitations).lower()
+
+
+def test_multi_source_lookup_exposes_sources_and_partial_limitations():
+    class PartialProvider:
+        def lookup(self, url: str):
+            return ReputationLookup(
+                matched=True,
+                source="virustotal+urlhaus",
+                details="Independent reputation signals were found.",
+                sources=("virustotal", "urlhaus"),
+                limitations=("URLhaus lookup failed; this result is partial.",),
+            )
+
+    result = scan_url("https://example.com", PartialProvider())
+
+    assert result.lookup_source == "virustotal+urlhaus"
+    assert result.lookup_sources == ["virustotal", "urlhaus"]
+    assert "partial" in " ".join(result.limitations).lower()

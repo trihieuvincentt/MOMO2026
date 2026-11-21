@@ -35,3 +35,4 @@ class URLScanResult(BaseModel):
     status: URLScanStatus
     mode: URLResultMode
     lookup_source: str | None = None
+    lookup_sources: list[str] = Field(default_factory=list)

@@ -143,7 +143,9 @@ Assess URL structure and, where configured, query a trusted reputation service w
 
 ### Processing
 - Parse and normalize safely; identify malformed input and basic observations (scheme, hostname, unusual encoding or lookalike-like characteristics only if implemented and tested).
-- Query an approved reputation provider through the backend when configured.
+- Query the configured reputation sources through the backend: VirusTotal provides multi-engine URL analysis, while URLhaus provides an independent malware-URL cross-check.
+- Treat VirusTotal and URLhaus as reputation evidence layers, not as the complete scam-detection system. Static URL rules, message/OCR evidence, Gemini investigation, and deterministic risk policy remain separate components.
+- Preserve source-level results and limitations. If one provider fails, retain the other provider's result and label the assessment partial; if both fail, return unavailable/error without claiming safety.
 - Do not retrieve arbitrary page content or follow redirects in the MVP.
 - Provider responses must be mapped to `verified_match`, `no_signal_found`, `unverified`, or `unavailable/error` with provider and timestamp metadata as appropriate.
 - Gemini Investigation Engine may interpret these structured URL observations together with related case evidence, but it cannot replace the reputation lookup or invent a reputation result.
@@ -151,7 +153,7 @@ Assess URL structure and, where configured, query a trusted reputation service w
 
 ### Output
 - Parsed hostname and safe URL observations.
-- Reputation status, source/provider, check time/status, and limitations.
+- Reputation status, each source/provider queried, source-level findings, check time/status, and limitations.
 - Findings must not state that an unlisted URL is safe.
 
 ### Acceptance criteria

@@ -114,6 +114,8 @@ def _coerce_lookup(value: ReputationLookup | dict) -> ReputationLookup:
         matched=bool(value["matched"]),
         source=str(value["source"]),
         details=value.get("details"),
+        sources=tuple(value.get("sources", ())),
+        limitations=tuple(value.get("limitations", ())),
     )
 
 
@@ -154,6 +156,7 @@ def scan_url(
             status=URLScanStatus.SUCCESS,
             mode=URLResultMode.FIXTURE,
             lookup_source="fixture",
+            lookup_sources=["fixture"],
         )
 
     if provider is None:
@@ -204,6 +207,8 @@ def scan_url(
         )
         limitations = ["No known match from the queried source is not a safety guarantee."]
 
+    limitations.extend(lookup.limitations)
+    lookup_sources = list(lookup.sources) or [lookup.source]
     return URLScanResult(
         observation=observation,
         findings=[finding],
@@ -211,4 +216,5 @@ def scan_url(
         status=URLScanStatus.SUCCESS,
         mode=URLResultMode.LIVE,
         lookup_source=lookup.source,
+        lookup_sources=lookup_sources,
     )
