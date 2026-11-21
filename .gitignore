@@ -21,6 +21,7 @@ uploads/
 .tmp/
 
 # Worktrees and plan workspace
+.claude/
 .worktrees/
 .superpowers/
 
