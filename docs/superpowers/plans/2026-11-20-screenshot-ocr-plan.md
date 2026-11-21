@@ -48,11 +48,11 @@
 
 **Interfaces:** `GeminiVisionExtractor.extract(image_bytes: bytes, language_hint: str | None) -> OCRResult`; `OCRResult` includes `text`, `warnings`, `ocr_source`, `provider_notice`, and optional regions/confidence.
 
-- [ ] Test valid extraction, unreadable/uncertain text, provider timeout, malformed response, and that `ocr_source == "gemini_vision"` plus a provider notice is returned.
-- [ ] Implement extraction-only prompt: do not ask Gemini Vision to make a scam verdict; mark unreadable portions and return uncertainty notes.
-- [ ] Ensure fallback is invoked only after PaddleOCR failure/unavailability or an explicit configured fallback mode.
-- [ ] Run focused tests; expect pass with mocked Gemini client.
-- [ ] Commit `feat: add explicit Gemini Vision OCR fallback`.
+- [x] Test valid extraction, unreadable/uncertain text, provider timeout, malformed response, and that `ocr_source == "gemini_vision"` plus a provider notice is returned.
+- [x] Implement extraction-only prompt: do not ask Gemini Vision to make a scam verdict; mark unreadable portions and return uncertainty notes.
+- [x] Ensure fallback is invoked only after PaddleOCR failure/unavailability or an explicit configured fallback mode.
+- [x] Run focused tests; expect pass with mocked Gemini client.
+- [x] Commit `feat: add explicit Gemini Vision OCR fallback`.
 
 ### Task 3: Validate and process image uploads
 
@@ -60,11 +60,11 @@
 
 **Interfaces:** `POST /api/v1/ocr/extract` multipart image + optional language hint; returns `OCRExtraction(id, extracted_text, warnings, status, ocr_source, provider_notice, retention_expires_at)`.
 
-- [ ] Test content sniffing, allowed formats, byte/pixel limit, corrupt image, PaddleOCR failure followed by Gemini Vision fallback, explicit provider notice, empty extraction, and temporary-file cleanup.
-- [ ] Implement bounded temporary storage, content validation, primary/fallback engine injection, cleanup in `finally`, explicit `ocr_source`, user-facing notice when Gemini receives the image, and empty/low-confidence warnings.
-- [ ] Ensure sensitive text is not written to logs and temporary image/text retention ends after the active case requirement.
-- [ ] Run OCR tests; expected pass without persistent image storage.
-- [ ] Commit `feat: add bounded screenshot OCR endpoint`.
+- [x] Test content sniffing, allowed formats, byte/pixel limit, corrupt image, PaddleOCR failure followed by Gemini Vision fallback, explicit provider notice, empty extraction, and temporary-file cleanup.
+- [x] Implement bounded temporary storage, content validation, primary/fallback engine injection, cleanup in `finally`, explicit `ocr_source`, user-facing notice when Gemini receives the image, and empty/low-confidence warnings.
+- [x] Ensure sensitive text is not written to logs and temporary image/text retention ends after the active case requirement.
+- [x] Run OCR tests; expected pass without persistent image storage.
+- [x] Commit `feat: add bounded screenshot OCR endpoint`.
 
 ### Task 4: Add review/edit/confirm UI
 
