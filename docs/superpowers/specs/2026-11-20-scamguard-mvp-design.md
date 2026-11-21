@@ -172,10 +172,13 @@ Extract text from a user-provided screenshot so the user can inspect/correct it 
 
 ### Processing
 - Run OCR as a separate backend component, initially PaddleOCR if a proof-of-fit confirms installation, deployment footprint, license, and Vietnamese/English quality.
-- Treat language support as tested capability, not an assumption; mixed-language screenshots should be included in validation.
+- The OCR proof-of-fit must run on the target public deployment environment (Render or the selected alternative) and record startup time, memory usage, model download behavior, and failure modes.
+- Validate Vietnamese, English, mixed-language, blurry, and small-text screenshots. Language support is a tested capability, not an assumption.
+- If PaddleOCR fails or is unavailable, Gemini Vision may be used as an explicit fallback for text extraction only. The UI must show `ocr_source` as `paddleocr` or `gemini_vision` and indicate when the image is sent to Gemini.
+- Gemini Vision fallback must return extracted text plus uncertainty notes; the user must review/edit the text before Message Scanner analysis.
 - Return extracted text and, if available, confidence/region data. Do not silently analyze OCR output before the user has had the opportunity to review it.
 - Provide a manual text-entry fallback when OCR fails or returns too little text.
-- Avoid logging/storing raw images beyond the active workflow unless retention is explicitly approved.
+- Do not retain uploaded images or sensitive OCR text longer than the active case requires; clean temporary files after processing and avoid raw-content logs.
 
 ### Output and acceptance criteria
 - User can view/edit extracted text and explicitly proceed to analysis.
