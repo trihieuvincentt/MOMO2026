@@ -1,15 +1,18 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from backend.app.api.routes.cases import case_repository
+import backend.app.api.routes.cases as cases_routes
+from backend.app.services.case_service import InMemoryCaseRepository
 from backend.app.main import app
 
 client = TestClient(app)
 
 
 @pytest.fixture(autouse=True)
-def clear_cases():
-    case_repository.clear()
+def clear_cases(monkeypatch):
+    repository = InMemoryCaseRepository()
+    monkeypatch.setattr(cases_routes, "case_repository", repository)
+    repository.clear()
 
 
 def test_case_lifecycle_creates_adds_analyzes_and_reads_case():

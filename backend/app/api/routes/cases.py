@@ -1,5 +1,8 @@
 from fastapi import APIRouter, HTTPException
+import os
 from pydantic import BaseModel, Field
+
+from backend.app.repositories.case_repository import PostgresCaseRepository
 
 from backend.app.schemas.case import Case
 from backend.app.schemas.evidence import EvidenceItem, EvidenceType
@@ -15,7 +18,16 @@ from backend.app.services.case_service import (
 from backend.app.services.report_builder import build_report
 
 router = APIRouter(prefix="/api/v1/cases", tags=["cases"])
-case_repository = InMemoryCaseRepository()
+
+
+def get_case_repository():
+    database_url = os.getenv("DATABASE_URL", "").strip()
+    if database_url:
+        return PostgresCaseRepository(database_url)
+    return InMemoryCaseRepository()
+
+
+case_repository = get_case_repository()
 
 
 class EvidenceItemRequest(BaseModel):

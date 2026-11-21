@@ -1,13 +1,14 @@
 from fastapi.testclient import TestClient
 
-from backend.app.api.routes.cases import case_repository
+import backend.app.api.routes.cases as cases_routes
+from backend.app.services.case_service import InMemoryCaseRepository
 from backend.app.main import app
 
 client = TestClient(app)
 
 
 def setup_function():
-    case_repository.clear()
+    cases_routes.case_repository = InMemoryCaseRepository()
 
 
 def test_report_endpoint_returns_structured_report_for_analyzed_case():
