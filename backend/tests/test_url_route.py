@@ -24,7 +24,9 @@ def test_url_endpoint_returns_explicit_fixture_result():
     assert "fixture" in " ".join(body["limitations"]).lower()
 
 
-def test_url_endpoint_reports_provider_unavailable_without_configuration():
+def test_url_endpoint_reports_provider_unavailable_without_configuration(monkeypatch):
+    monkeypatch.delenv("GOOGLE_WEB_RISK_API_KEY", raising=False)
+
     response = client.post("/api/v1/url/analyze", json={"url": "https://example.com"})
 
     assert response.status_code == 200
