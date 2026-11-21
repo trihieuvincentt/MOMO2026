@@ -34,11 +34,11 @@
 
 **Interfaces:** `assess_risk(findings: list[Finding], scanner_statuses: list[ScannerStatus]) -> RiskAssessment`; result includes category, explanation, contributing IDs, unknowns, recommendations, and `policy_version`.
 
-- [ ] Add table-driven tests for each category, verified match, missing scan, duplicate findings, and contradictions.
-- [ ] Document initial strong/weak indicator mapping and aggregation thresholds in `docs/risk-policy.md` before implementation.
-- [ ] Implement pure deterministic policy; do not accept free-form model risk score.
-- [ ] Run focused tests; expect pass and deterministic outputs.
-- [ ] Commit `feat: add explainable risk policy`.
+- [x] Add table-driven tests for each category, verified match, missing scan, duplicate findings, and contradictions.
+- [x] Document initial strong/weak indicator mapping and aggregation thresholds in `docs/risk-policy.md` before implementation.
+- [x] Implement pure deterministic policy; do not accept free-form model risk score.
+- [x] Run focused tests; expect pass and deterministic outputs.
+- [x] Commit `feat: add explainable risk policy`.
 
 ### Task 2: Add recommendation mapping and safety copy
 
@@ -46,17 +46,17 @@
 
 **Interfaces:** `recommend_actions(assessment: RiskAssessment, findings: list[Finding]) -> list[Recommendation]`.
 
-- [ ] Test high/elevated/caution/no-signal/insufficient-information actions, including before-payment and credential-exposure cases.
-- [ ] Implement curated action templates; do not ask for credentials or imply transfer blocking.
-- [ ] Ensure every recommendation includes reason and priority.
-- [ ] Run tests; expect pass.
-- [ ] Commit `feat: map risk findings to safe actions`.
+- [x] Test high/elevated/caution/no-signal/insufficient-information actions, including before-payment and credential-exposure cases.
+- [x] Implement curated action templates; do not ask for credentials or imply transfer blocking.
+- [x] Ensure every recommendation includes reason and priority.
+- [x] Run tests; expect pass.
+- [x] Commit `feat: map risk findings to safe actions`.
 
 ### Task 3: Expose assessment contract for case integration
 
 **Files:** `backend/app/services/case_service.py`, `backend/tests/test_risk_integration.py`.
 
-- [ ] Test that only validated findings contribute, unavailable checks produce unknowns, and reportable evidence references survive aggregation.
-- [ ] Integrate the pure assessor into case analysis; retain policy version in result.
-- [ ] Run risk and case integration suites; expect pass.
-- [ ] Commit `feat: integrate risk assessment with cases`.
+- [x] Test that only validated findings contribute, unavailable checks produce unknowns, and reportable evidence references survive aggregation.
+- [x] Integrate the pure assessor into case analysis; retain policy version in result.
+- [x] Run risk and case integration suites; expect pass.
+- [x] Commit `feat: integrate risk assessment with cases`.

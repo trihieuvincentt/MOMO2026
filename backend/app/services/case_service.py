@@ -10,6 +10,8 @@ from backend.app.schemas.finding import Finding
 from backend.app.schemas.message import MessageScanRequest, MessageScanResult, ScannerStatus
 from backend.app.schemas.url import URLScanResult
 from backend.app.services.message_scanner import analyze_message
+from backend.app.services.recommendation_catalog import recommend_actions
+from backend.app.services.risk_assessor import assess_risk
 from backend.app.services.url_scanner import scan_url
 
 
@@ -157,6 +159,16 @@ def analyze_case(
             case.scanner_statuses[evidence.id] = EvidenceScanStatus.ERROR
 
     _record_relationships(case)
+    case.risk_assessment = assess_risk(
+        case.findings,
+        list(case.scanner_statuses.values()),
+    )
+    case.risk_assessment.recommendations = recommend_actions(
+        case.risk_assessment,
+        case.findings,
+    )
+    case.overall_risk = case.risk_assessment.category.value
+    case.summary = case.risk_assessment.explanation
     case.status = CaseStatus.ANALYZED if successful else CaseStatus.ERROR
     repository.save(case)
     return CaseAnalysisResult(case=deepcopy(case))
