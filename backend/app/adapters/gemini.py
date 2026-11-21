@@ -42,6 +42,7 @@ class GeminiInvestigationModel:
             raise ValueError("Gemini API key is required")
         self._api_key = api_key.strip()
         self._model_name = model_name
+        self.model_name = model_name
         self._timeout_seconds = timeout_seconds
         self._transport = transport
 

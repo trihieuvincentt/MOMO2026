@@ -34,4 +34,7 @@ def get_investigation_model() -> GeminiInvestigationModel | None:
     api_key = os.getenv("GEMINI_API_KEY", "")
     if not api_key.strip():
         return None
-    return GeminiInvestigationModel(api_key)
+    return GeminiInvestigationModel(
+        api_key,
+        model_name=os.getenv("GEMINI_MODEL", "gemini-3.8-flash").strip() or "gemini-3.8-flash",
+    )
