@@ -34,10 +34,10 @@
 
 **Interfaces:** `build_report(case: Case, risk: RiskAssessment, recommendations: list[Recommendation]) -> InvestigationReport`; sections include summary, evidence items, findings, supported relationships, unknowns/limitations, actions.
 
-- [ ] Test full case, partial scanner failure, no-known-signal, unsupported finding, empty case, and evidence references.
-- [ ] Implement builder as deterministic transformation; exclude unsupported statements and include statuses/limitations.
-- [ ] Run report builder tests; expect pass.
-- [ ] Commit `feat: build structured investigation reports`.
+- [x] Test full case, partial scanner failure, no-known-signal, unsupported finding, empty case, and evidence references.
+- [x] Implement builder as deterministic transformation; exclude unsupported statements and include statuses/limitations.
+- [x] Run report builder tests; expect pass.
+- [x] Commit `feat: build structured investigation reports`.
 
 ### Task 2: Expose report endpoint
 
@@ -45,10 +45,10 @@
 
 **Interfaces:** `GET /api/v1/cases/{case_id}/report` returns `InvestigationReport`.
 
-- [ ] Test existing case, missing case, scanner unavailable, and response schema validation.
-- [ ] Implement endpoint by loading canonical case and invoking report builder.
-- [ ] Run focused and backend tests; expect pass.
-- [ ] Commit `feat: expose investigation report endpoint`.
+- [x] Test existing case, missing case, scanner unavailable, and response schema validation.
+- [x] Implement endpoint by loading canonical case and invoking report builder.
+- [x] Run focused and backend tests; expect pass.
+- [x] Commit `feat: expose investigation report endpoint`.
 
 ### Task 3: Render report UI and verify traceability
 
