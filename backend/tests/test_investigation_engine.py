@@ -144,3 +144,24 @@ def test_validation_failure_logs_only_schema_locations(caplog):
     assert "not-a-list" not in caplog.text
     assert "Pay a fee now" not in caplog.text
     assert "https://example.com/" not in caplog.text
+
+
+def test_invalid_relationship_is_dropped_without_discarding_valid_interpretation():
+    class PartiallyInvalidModel:
+        def generate(self, prompt: str):
+            return {
+                "summary": "The message requests credentials.",
+                "finding_explanations": [
+                    {"finding_id": "f-fee", "explanation": "It requests an upfront payment."}
+                ],
+                "relationships": [{"source_evidence_id": None, "target_evidence_id": None, "basis": None}],
+                "unknowns": [],
+            }
+
+    result = investigate_case(make_case(), PartiallyInvalidModel())
+
+    assert result.status == InvestigationStatus.DEGRADED
+    assert result.summary == "The message requests credentials."
+    assert result.finding_explanations[0].finding_id == "f-fee"
+    assert result.relationships == []
+    assert any("relationship" in item.lower() for item in result.limitations)

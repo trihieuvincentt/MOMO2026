@@ -63,10 +63,29 @@ def _validate_references(case: Case, output: InvestigationModelOutput) -> tuple[
     return output.model_copy(update={"finding_explanations": explanations, "relationships": relationships}), invalid
 
 
+def _parse_model_output(raw_output: object) -> tuple[InvestigationModelOutput, list[str]]:
+    if not isinstance(raw_output, dict):
+        return InvestigationModelOutput.model_validate(raw_output), []
+
+    raw_relationships = raw_output.get("relationships", [])
+    if not isinstance(raw_relationships, list):
+        return InvestigationModelOutput.model_validate(raw_output), []
+    base_output = {**raw_output, "relationships": []}
+    output = InvestigationModelOutput.model_validate(base_output)
+    relationships: list[SupportedRelationship] = []
+    invalid: list[str] = []
+    for relationship in raw_relationships:
+        try:
+            relationships.append(SupportedRelationship.model_validate(relationship))
+        except ValidationError:
+            invalid.append("Invalid evidence relationship item rejected.")
+    return output.model_copy(update={"relationships": relationships}), invalid
+
+
 def investigate_case(case: Case, model: InvestigationModel) -> InvestigationResult:
     try:
         raw_output = model.generate(_prompt_for_case(case))
-        output = InvestigationModelOutput.model_validate(raw_output)
+        output, invalid_output = _parse_model_output(raw_output)
     except (TimeoutError, Exception) as exc:
         if isinstance(exc, ValidationError):
             locations = [".".join(str(part) for part in error["loc"]) for error in exc.errors()]
@@ -89,6 +108,7 @@ def investigate_case(case: Case, model: InvestigationModel) -> InvestigationResu
         )
 
     validated, invalid_references = _validate_references(case, output)
+    invalid_references = [*invalid_output, *invalid_references]
     if invalid_references:
         return InvestigationResult(
             status=InvestigationStatus.DEGRADED,
@@ -96,7 +116,9 @@ def investigate_case(case: Case, model: InvestigationModel) -> InvestigationResu
             finding_explanations=validated.finding_explanations,
             relationships=validated.relationships,
             unknowns=[*validated.unknowns, *invalid_references],
-            limitations=["Some model references were rejected because they did not resolve to case evidence."],
+            limitations=[
+                "Some model relationship/output items were rejected because they were invalid or did not resolve to case evidence."
+            ],
         )
 
     return InvestigationResult(
