@@ -81,9 +81,11 @@ def extract_text_from_image(
             notice = None
             status = OCRStatus.SUCCESS
         except Exception as exc:
+            detail = str(exc).replace("\r", " ").replace("\n", " ")[:240]
             logger.warning(
-                "PaddleOCR unavailable: error_type=%s",
+                "PaddleOCR unavailable: error_type=%s error_detail=%s",
                 type(exc).__name__,
+                detail,
             )
             if gemini_engine is None:
                 return OCRExtraction(

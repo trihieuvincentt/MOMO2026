@@ -14,6 +14,11 @@ class FailingPaddle:
         raise RuntimeError("engine unavailable")
 
 
+class ImportFailingPaddle:
+    def extract(self, image_path, language_hint=None):
+        raise ImportError("No module named 'paddleocr'")
+
+
 class SuccessfulGeminiVision:
     def __init__(self):
         self.received = []
@@ -104,6 +109,23 @@ def test_ocr_fallback_logs_engine_type_without_image_or_text(caplog, tmp_path):
     assert "RuntimeError" in caplog.text
     assert "private-image-bytes" not in caplog.text
     assert "Gemini extracted text" not in caplog.text
+
+
+def test_ocr_import_error_logs_sanitized_detail(caplog, tmp_path):
+    with caplog.at_level("WARNING", logger="backend.app.services.ocr_service"):
+        extract_text_from_image(
+            b"private-image-bytes",
+            filename="private.png",
+            language_hint="en",
+            temp_dir=tmp_path,
+            paddle_engine=ImportFailingPaddle(),
+            gemini_engine=SuccessfulGeminiVision(),
+            image_validator=lambda data: ("image/png", 10, 10),
+        )
+
+    assert "error_type=ImportError" in caplog.text
+    assert "error_detail=No module named 'paddleocr'" in caplog.text
+    assert "private-image-bytes" not in caplog.text
 
 
 def test_ocr_service_returns_manual_entry_warning_when_both_engines_unavailable(tmp_path):
