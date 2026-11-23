@@ -146,6 +146,27 @@ def test_validation_failure_logs_only_schema_locations(caplog):
     assert "https://example.com/" not in caplog.text
 
 
+def test_single_evidence_prompt_forbids_relationships():
+    captured = {}
+
+    class PromptModel:
+        def generate(self, prompt: str):
+            captured["prompt"] = prompt
+            return {
+                "summary": "Only one evidence item was supplied.",
+                "finding_explanations": [],
+                "relationships": [],
+                "unknowns": [],
+            }
+
+    case = make_case().model_copy(update={"evidence": [make_case().evidence[0]]})
+    result = investigate_case(case, PromptModel())
+
+    assert result.status == InvestigationStatus.SUCCESS
+    assert "fewer than two evidence items" in captured["prompt"]
+    assert "relationships as an empty array" in captured["prompt"]
+
+
 def test_invalid_relationship_is_dropped_without_discarding_valid_interpretation():
     class PartiallyInvalidModel:
         def generate(self, prompt: str):
