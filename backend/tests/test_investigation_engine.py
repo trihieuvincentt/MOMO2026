@@ -122,3 +122,25 @@ def test_provider_failure_logs_diagnostics_without_prompt_or_sensitive_evidence(
     assert api_key not in caplog.text
     assert "Pay a fee now" not in caplog.text
     assert "https://example.com/" not in caplog.text
+
+
+def test_validation_failure_logs_only_schema_locations(caplog):
+    class InvalidModel:
+        model_name = "gemini-test-model"
+
+        def generate(self, prompt: str):
+            return {
+                "summary": "ok",
+                "finding_explanations": "not-a-list",
+                "relationships": [],
+                "unknowns": [],
+            }
+
+    with caplog.at_level("WARNING", logger="backend.app.services.investigation_engine"):
+        result = investigate_case(make_case(), InvalidModel())
+
+    assert result.status == InvestigationStatus.DEGRADED
+    assert "validation_locations=['finding_explanations']" in caplog.text
+    assert "not-a-list" not in caplog.text
+    assert "Pay a fee now" not in caplog.text
+    assert "https://example.com/" not in caplog.text
