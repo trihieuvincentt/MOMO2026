@@ -63,6 +63,49 @@ def test_ocr_service_falls_back_to_gemini_after_paddle_failure(tmp_path):
     assert list(tmp_path.iterdir()) == []
 
 
+def test_ocr_service_falls_back_to_gemini_after_paddle_failure(tmp_path):
+    image = b"test-image-bytes"
+    gemini = SuccessfulGeminiVision()
+
+    result = extract_text_from_image(
+        image,
+        filename="sample.png",
+        language_hint="vi",
+        temp_dir=tmp_path,
+        paddle_engine=FailingPaddle(),
+        gemini_engine=gemini,
+        image_validator=lambda data: ("image/png", 10, 10),
+    )
+
+    assert result.ocr_source == OCRSource.GEMINI_VISION
+    assert result.extracted_text == "Gemini extracted text"
+    assert "sent to Gemini" in result.provider_notice
+    assert gemini.received == [image]
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_ocr_fallback_logs_engine_type_without_image_or_text(caplog, tmp_path):
+    image = b"private-image-bytes"
+    gemini = SuccessfulGeminiVision()
+
+    with caplog.at_level("WARNING", logger="backend.app.services.ocr_service"):
+        result = extract_text_from_image(
+            image,
+            filename="private.png",
+            language_hint="en",
+            temp_dir=tmp_path,
+            paddle_engine=FailingPaddle(),
+            gemini_engine=gemini,
+            image_validator=lambda data: ("image/png", 10, 10),
+        )
+
+    assert result.ocr_source == OCRSource.GEMINI_VISION
+    assert "PaddleOCR unavailable" in caplog.text
+    assert "RuntimeError" in caplog.text
+    assert "private-image-bytes" not in caplog.text
+    assert "Gemini extracted text" not in caplog.text
+
+
 def test_ocr_service_returns_manual_entry_warning_when_both_engines_unavailable(tmp_path):
     result = extract_text_from_image(
         b"test-image-bytes",

@@ -1,4 +1,5 @@
 import io
+import logging
 from pathlib import Path
 
 from PIL import Image, UnidentifiedImageError
@@ -7,6 +8,8 @@ _ALLOWED_FORMATS = {
     "PNG": ("image/png", b"\x89PNG\r\n\x1a\n"),
     "JPEG": ("image/jpeg", b"\xff\xd8\xff"),
 }
+
+logger = logging.getLogger(__name__)
 
 
 def validate_image_bytes(
@@ -77,7 +80,11 @@ def extract_text_from_image(
             source = OCRSource.PADDLEOCR
             notice = None
             status = OCRStatus.SUCCESS
-        except Exception:
+        except Exception as exc:
+            logger.warning(
+                "PaddleOCR unavailable: error_type=%s",
+                type(exc).__name__,
+            )
             if gemini_engine is None:
                 return OCRExtraction(
                     id=f"ocr-{uuid4().hex[:12]}",
