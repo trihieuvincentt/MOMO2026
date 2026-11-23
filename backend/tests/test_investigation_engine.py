@@ -101,3 +101,24 @@ def test_provider_timeout_returns_rule_only_degraded_result():
     assert result.status == InvestigationStatus.DEGRADED
     assert "rule" in result.summary.lower()
     assert result.finding_explanations == []
+
+
+def test_provider_failure_logs_diagnostics_without_prompt_or_sensitive_evidence(caplog):
+    api_key = "secret-api-key"
+
+    class FailingModel:
+        model_name = "gemini-test-model"
+
+        def generate(self, prompt: str):
+            raise RuntimeError(f"provider rejected request for {api_key}: {prompt}")
+
+    with caplog.at_level("WARNING", logger="backend.app.services.investigation_engine"):
+        result = investigate_case(make_case(), FailingModel())
+
+    assert result.status == InvestigationStatus.DEGRADED
+    assert "Gemini investigation degraded" in caplog.text
+    assert "RuntimeError" in caplog.text
+    assert "gemini-test-model" in caplog.text
+    assert api_key not in caplog.text
+    assert "Pay a fee now" not in caplog.text
+    assert "https://example.com/" not in caplog.text

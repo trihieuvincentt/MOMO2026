@@ -1,4 +1,5 @@
 import json
+import logging
 from typing import Protocol
 
 from backend.app.schemas.case import Case
@@ -9,6 +10,9 @@ from backend.app.schemas.investigation import (
     InvestigationStatus,
     SupportedRelationship,
 )
+
+
+logger = logging.getLogger(__name__)
 
 
 class InvestigationModel(Protocol):
@@ -62,6 +66,11 @@ def investigate_case(case: Case, model: InvestigationModel) -> InvestigationResu
         raw_output = model.generate(_prompt_for_case(case))
         output = InvestigationModelOutput.model_validate(raw_output)
     except (TimeoutError, Exception) as exc:
+        logger.warning(
+            "Gemini investigation degraded: error_type=%s model=%s",
+            type(exc).__name__,
+            getattr(model, "model_name", "unknown"),
+        )
         return InvestigationResult(
             status=InvestigationStatus.DEGRADED,
             summary="Gemini investigation was unavailable; showing rule-based findings only.",
