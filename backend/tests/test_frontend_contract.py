@@ -15,6 +15,13 @@ def test_scanner_workflows_use_expected_api_contracts():
     assert "limitations" in APP
 
 
+def test_campaign_intelligence_is_rendered_safely():
+    assert "campaign_matches" in APP
+    assert "artifacts" in APP
+    assert "shared_artifact_values" in APP
+    assert "No prior campaign match found" in APP
+
+
 def test_ocr_workflow_has_review_source_notice_and_explicit_confirmation():
     assert "/api/v1/ocr/extract" in APP
     assert "FormData" in APP

@@ -18,13 +18,17 @@ function renderResult(data, title) {
   const limitations = Array.isArray(data.limitations) ? data.limitations : [];
   const risk = data.risk_assessment || data.risk;
   const recs = risk && Array.isArray(risk.recommendations) ? risk.recommendations : [];
+  const artifacts = Array.isArray(data.artifacts) ? data.artifacts : [];
+  const campaignMatches = Array.isArray(data.campaign_matches) ? data.campaign_matches : [];
   const findingHtml = findings.map((item) => {
     const finding = item.finding || item;
     return `<div class="finding"><strong>${escapeHtml(finding.category || 'Indicator')} · ${escapeHtml(finding.severity || 'unknown')}</strong><small>${escapeHtml(finding.description || '')}</small></div>`;
   }).join('') || '<p>No known signal found. Absence of a finding is not a safety guarantee.</p>';
   const recHtml = recs.map((item) => `<li>${escapeHtml(item.action || '')}</li>`).join('');
+  const artifactHtml = artifacts.map((item) => `<li><strong>${escapeHtml(item.type || 'artifact')}</strong>: ${escapeHtml(item.display_value || item.normalized_value || '')}</li>`).join('') || '<li>No reusable artifacts extracted.</li>';
+  const campaignHtml = campaignMatches.map((match) => `<div class="finding"><strong>Related case match · score ${escapeHtml(match.score)}</strong><small>Shared: ${escapeHtml((match.shared_artifact_values || []).join(', '))}</small></div>`).join('') || '<p>No prior campaign match found. This does not mean the message is safe.</p>';
   const limitHtml = limitations.map((item) => `<li>${escapeHtml(item)}</li>`).join('');
-  resultBox.innerHTML = `<div class="result-header"><strong>${escapeHtml(title)}</strong><span class="risk-badge">${escapeHtml((risk && risk.category) || data.status || 'complete')}</span></div><div class="result-body"><div class="result-section"><h4>Summary</h4><p>${escapeHtml(data.summary || (risk && risk.explanation) || 'Analysis complete.')}</p></div><div class="result-section"><h4>Findings</h4>${findingHtml}</div>${recHtml ? `<div class="result-section"><h4>Recommended next steps</h4><ul>${recHtml}</ul></div>` : ''}${limitHtml ? `<div class="result-section"><h4>Limitations</h4><ul>${limitHtml}</ul></div>` : ''}</div>`;
+  resultBox.innerHTML = `<div class="result-header"><strong>${escapeHtml(title)}</strong><span class="risk-badge">${escapeHtml((risk && risk.category) || data.status || 'complete')}</span></div><div class="result-body"><div class="result-section"><h4>Summary</h4><p>${escapeHtml(data.summary || (risk && risk.explanation) || 'Analysis complete.')}</p></div><div class="result-section"><h4>Findings</h4>${findingHtml}</div><div class="result-section"><h4>Extracted artifacts</h4><ul>${artifactHtml}</ul></div><div class="result-section"><h4>Campaign intelligence</h4>${campaignHtml}</div>${recHtml ? `<div class="result-section"><h4>Recommended next steps</h4><ul>${recHtml}</ul></div>` : ''}${limitHtml ? `<div class="result-section"><h4>Limitations</h4><ul>${limitHtml}</ul></div>` : ''}</div>`;
 }
 async function requestJson(path, options) {
   const response = await fetch(path, options);
