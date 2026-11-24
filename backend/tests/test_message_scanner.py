@@ -38,7 +38,36 @@ def test_brand_mention_without_prize_claim_is_not_flagged_as_impersonation():
     assert not any(f.category == "brand_impersonation" for f in result.findings)
 
 
-def test_empty_message_is_rejected():
+def test_account_deactivation_phishing_returns_multiple_findings():
+    text = (
+        "Your account will be deactivated. Please verify your account by clicking "
+        "http://facebook-help.social/gbGPWUB before it is permanently locked."
+    )
+    result = analyze_message(MessageScanRequest(text=text))
+    categories = {finding.category for finding in result.findings}
+
+    assert {"account_deactivation_threat", "verification_phishing", "external_link_request"} <= categories
+    assert any(finding.category == "account_deactivation_threat" and finding.severity == "high" for finding in result.findings)
+    assert any(finding.category == "verification_phishing" and finding.severity == "high" for finding in result.findings)
+
+
+def test_vietnamese_bank_transfer_and_otp_scam_is_detected():
+    text = "Tài khoản sẽ bị khóa. Vui lòng xác minh OTP và chuyển khoản phí kích hoạt ngay hôm nay."
+    result = analyze_message(MessageScanRequest(text=text))
+    categories = {finding.category for finding in result.findings}
+
+    assert "account_deactivation_threat" in categories
+    assert "credential_request" in categories
+    assert "advance_fee" in categories
+
+
+def test_investment_scam_returns_investment_finding():
+    text = "Guaranteed profit 300% in 24 hours. Deposit now and our expert will trade for you."
+    result = analyze_message(MessageScanRequest(text=text))
+
+    assert any(finding.category == "investment_scam" for finding in result.findings)
+
+
     try:
         MessageScanRequest(text="   ")
     except ValueError:
