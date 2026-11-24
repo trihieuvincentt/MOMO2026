@@ -16,6 +16,7 @@ COPY pyproject.toml uv.lock ./
 RUN uv sync --locked --no-dev --extra ocr
 
 COPY backend ./backend
+COPY frontend ./frontend
 
 EXPOSE 8080
 CMD ["uv", "run", "--no-sync", "uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "8080"]

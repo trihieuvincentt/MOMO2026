@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ScamGuard AI</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand-mark" aria-hidden="true">S</div>
+    <div>
+      <p class="eyebrow">EVIDENCE-FIRST PROTECTION</p>
+      <h1>ScamGuard <span>AI</span></h1>
+      <p class="tagline">Turn suspicious messages, links, and screenshots into clear next steps.</p>
+    </div>
+    <div class="live-pill"><i></i> Online analysis</div>
+  </header>
+
+  <main class="shell">
+    <section class="hero-panel">
+      <div>
+        <p class="kicker">INVESTIGATION WORKSPACE</p>
+        <h2>Check the signal.<br><em>Keep control.</em></h2>
+        <p>Analyze evidence with transparent findings and grounded recommendations. Your text stays in your hands until you choose to scan it.</p>
+      </div>
+      <div class="hero-stat"><strong>3</strong><span>ways to<br>investigate</span></div>
+    </section>
+
+    <nav class="tabs" aria-label="Investigation tools">
+      <button class="tab active" data-tab="message">Message scanner <span>01</span></button>
+      <button class="tab" data-tab="url">URL reputation <span>02</span></button>
+      <button class="tab" data-tab="ocr">Screenshot OCR <span>03</span></button>
+    </nav>
+
+    <section id="message-panel" class="tool-panel active" data-panel="message">
+      <div class="panel-heading"><div class="icon blue">✦</div><div><p class="kicker">MESSAGE SCANNER</p><h3>What did they send you?</h3><p>Paste a suspicious message to find pressure tactics, credential requests, and other known indicators.</p></div></div>
+      <form id="message-form" class="scan-form">
+        <label for="message-input">Message content</label>
+        <textarea id="message-input" placeholder="Paste the message here..." required maxlength="20000"></textarea>
+        <div class="form-footer"><span class="privacy-note">⌁ Content is analyzed only when you submit.</span><button class="primary-button" type="submit">Analyze message <span>→</span></button></div>
+      </form>
+    </section>
+
+    <section id="url-panel" class="tool-panel" data-panel="url" hidden>
+      <div class="panel-heading"><div class="icon orange">↗</div><div><p class="kicker">URL REPUTATION</p><h3>Does this link have a history?</h3><p>Check a URL against VirusTotal and URLhaus. We never fetch the submitted page.</p></div></div>
+      <form id="url-form" class="scan-form">
+        <label for="url-input">Suspicious URL</label>
+        <input id="url-input" type="url" placeholder="https://example.com" required maxlength="2048">
+        <div class="form-footer"><span class="privacy-note">⌁ Multi-source reputation lookup.</span><button class="primary-button" type="submit">Check URL <span>→</span></button></div>
+      </form>
+    </section>
+
+    <section id="ocr-panel" class="tool-panel" data-panel="ocr" hidden>
+      <div class="panel-heading"><div class="icon purple">▧</div><div><p class="kicker">SCREENSHOT OCR</p><h3>Make the image readable.</h3><p>Extract text from a screenshot, review it, then choose whether to scan the edited text.</p></div></div>
+      <form id="ocr-form" class="scan-form">
+        <label for="image-input" class="drop-zone"><span class="upload-icon">↑</span><strong>Choose a PNG or JPEG screenshot</strong><small>Maximum 5 MiB · text remains editable before analysis</small><input id="image-input" type="file" accept="image/png,image/jpeg,.png,.jpg,.jpeg" required></label>
+        <div id="ocr-meta" class="ocr-meta" hidden></div>
+        <label for="ocr-text">Review and edit extracted text</label>
+        <textarea id="ocr-text" placeholder="Extracted text will appear here after upload..." maxlength="20000" disabled></textarea>
+        <div class="form-footer"><span class="privacy-note">⌁ Nothing is scanned until you confirm.</span><button id="ocr-confirm" class="primary-button" type="button" disabled>Confirm &amp; scan <span>→</span></button></div>
+      </form>
+    </section>
+
+    <section id="result" class="result-panel" aria-live="polite"><div class="empty-result"><span>◎</span><p>Your analysis will appear here.</p><small>Start with any tab above.</small></div></section>
+    <p class="disclaimer">ScamGuard provides evidence-based signals, not certainty. Verify important claims through an independently found official channel.</p>
+  </main>
+  <script src="/static/app.js" defer></script>
+</body>
+</html>
