@@ -1,15 +1,5 @@
-from dataclasses import dataclass
-
 from backend.app.schemas.case import Case
-from backend.app.schemas.artifact import ArtifactType
-
-
-@dataclass(frozen=True)
-class CampaignMatch:
-    case_ids: list[str]
-    shared_artifact_types: list[str]
-    shared_artifact_values: list[str]
-    score: int
+from backend.app.schemas.artifact import ArtifactType, CampaignMatch
 
 
 def _supported_artifacts(case: Case):

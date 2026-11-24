@@ -12,6 +12,8 @@ from backend.app.schemas.message import MessageScanRequest, MessageScanResult, S
 from backend.app.schemas.url import URLScanResult
 from backend.app.schemas.investigation import InvestigationStatus, InvestigationResult
 from backend.app.services.investigation_engine import InvestigationModel, investigate_case
+from backend.app.services.artifact_extractor import extract_artifacts
+from backend.app.services.campaign_matcher import match_campaigns
 from backend.app.services.message_scanner import analyze_message
 from backend.app.services.recommendation_catalog import recommend_actions
 from backend.app.services.risk_assessor import assess_risk
@@ -166,6 +168,9 @@ def analyze_case(
             case.scanner_statuses[evidence.id] = EvidenceScanStatus.ERROR
 
     _record_relationships(case)
+    case.artifacts = extract_artifacts(case.evidence)
+    prior_cases = repository.list_cases() if hasattr(repository, "list_cases") else []
+    case.campaign_matches = match_campaigns(case, prior_cases)
     case.risk_assessment = assess_risk(
         case.findings,
         list(case.scanner_statuses.values()),

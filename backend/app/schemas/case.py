@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 
 from backend.app.schemas.evidence import EvidenceItem
 from backend.app.schemas.finding import Finding
-from backend.app.schemas.artifact import ScamArtifact
+from backend.app.schemas.artifact import CampaignMatch, ScamArtifact
 from backend.app.schemas.investigation import InvestigationResult
 from backend.app.schemas.risk import RiskAssessment
 
@@ -36,6 +36,7 @@ class Case(BaseModel):
     summary: str | None = None
     evidence: list[EvidenceItem] = Field(default_factory=list)
     artifacts: list[ScamArtifact] = Field(default_factory=list)
+    campaign_matches: list[CampaignMatch] = Field(default_factory=list)
     findings: list[Finding] = Field(default_factory=list)
     scanner_statuses: dict[str, EvidenceScanStatus] = Field(default_factory=dict)
     relationships: list[EvidenceRelationship] = Field(default_factory=list)

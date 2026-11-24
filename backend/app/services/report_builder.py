@@ -62,6 +62,8 @@ def build_report(
         summary=case.summary or risk.explanation,
         ai_summary=ai_summary,
         evidence_items=evidence_items,
+        artifacts=case.artifacts,
+        campaign_matches=case.campaign_matches,
         findings=report_findings,
         relationships=case.relationships,
         scanner_statuses=scanner_statuses,
