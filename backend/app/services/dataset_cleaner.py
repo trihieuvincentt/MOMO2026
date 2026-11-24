@@ -7,6 +7,8 @@ from backend.app.schemas.dataset import CleanDatasetRecord
 _EMAIL = re.compile(r"\b[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}\b")
 _PHONE = re.compile(r"(?<!\d)(?:\+?84|0)(?:[ .-]?\d){8,10}(?!\d)")
 _OTP = re.compile(r"\b(?:otp|one[- ]time password|mã xác thực|ma xac thuc)\s*[:#-]?\s*\d{4,8}\b", re.I)
+_SSN = re.compile(r"\b\d{3}-\d{2}-\d{4}\b")
+_CARD = re.compile(r"(?<!\d)(?:\d[ -]?){13,19}(?!\d)")
 
 
 def normalize_text(value: str) -> str:
@@ -16,6 +18,8 @@ def normalize_text(value: str) -> str:
 
 def mask_sensitive_values(value: str) -> str:
     value = _OTP.sub("OTP [REDACTED]", value)
+    value = _SSN.sub("[REDACTED_SSN]", value)
+    value = _CARD.sub("[REDACTED_CARD]", value)
     value = _EMAIL.sub("[REDACTED_EMAIL]", value)
     return _PHONE.sub("[REDACTED_PHONE]", value)
 

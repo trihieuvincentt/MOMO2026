@@ -56,7 +56,7 @@ def main() -> None:
     for name, config in names.items():
         rows = load_rows(config, fetch(config["url"]))
         if name == "vietnamese_sms":
-            records = clean_records(rows, source=config["source"], license_name=config["license"], text_field="text", id_field="message_id")
+            records = clean_records(rows, source=config["source"], license_name=config["license"], text_field="text", id_field="message_id", label_field="label")
         else:
             records = clean_records(rows, source=config["source"], license_name=config["license"], text_field="dialogue", id_field="__row_id", label_field="label", category_field="type", is_synthetic=True)
         target = output_dir / f"{name}.jsonl"

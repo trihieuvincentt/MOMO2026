@@ -16,6 +16,14 @@ def test_masks_obvious_otp_email_and_phone_values():
     assert "[REDACTED]" in masked
 
 
+def test_masks_ssn_and_financial_identifiers():
+    value = "Provide SSN 123-45-6789 and card 4111 1111 1111 1111"
+    masked = mask_sensitive_values(value)
+
+    assert "123-45-6789" not in masked
+    assert "4111 1111 1111 1111" not in masked
+
+
 def test_clean_records_deduplicates_and_preserves_provenance():
     rows = [
         {"message_id": "a", "text": "Urgent verify account"},

@@ -62,16 +62,16 @@ The evaluator invokes the existing `analyze_message` function without changing s
 - records with at least one scanner finding;
 - missed positive labels where a label is available;
 - feature-family coverage;
-- source row IDs and text for positive-label misses for offline review.
+- source row IDs and bounded, redacted excerpts for positive-label misses for offline review;
 
-Observed run on 4,044 cleaned records:
+Observed run on 4,044 cleaned records (the downloaded Vietnamese CSV exposes no label column, so its result is coverage-only):
 
-| Source | Total | Detected | Missed positive labels |
-|---|---:|---:|---:|
-| Synthetic scam dialogues | 3,837 | 1,095 | 939 |
-| Vietnamese SMS phishing sample | 207 | 131 | 0 |
+| Source | Total | Detected | Labeled | Unlabeled | Missed positive labels |
+|---|---:|---:|---:|---:|---:|
+| Synthetic scam dialogues | 3,837 | 1,095 | 3,837 | 0 | 939 |
+| Vietnamese SMS phishing sample | 207 | 131 | 0 | 207 | not measurable |
 
-These values are baseline coverage measurements, not a certified accuracy score. The synthetic dialogue distribution and labels may not represent live traffic, and not every source has an identical schema or labeling quality.
+The evaluator keeps unlabeled coverage separate from labeled missed-positive metrics. These values are baseline coverage measurements, not a certified accuracy score. The synthetic dialogue distribution and labels may not represent live traffic, and not every source has an identical schema or labeling quality.
 
 ## Limitations and safety interpretation
 
