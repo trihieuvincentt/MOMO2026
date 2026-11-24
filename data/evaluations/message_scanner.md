@@ -8,7 +8,7 @@
 
 | Source | Total | Detected | Missed positive labels |
 |---|---:|---:|---:|
-| synthetic | 3837 | 1068 | 962 |
+| synthetic | 3837 | 1095 | 939 |
 | trannguyenthaituan/vietnamese_sms_phishing_sample | 207 | 131 | 0 |
 
 ## Feature coverage
@@ -24,4 +24,4 @@
 - `urgency`: 656 records
 - `verification_phishing`: 941 records
 
-Positive-label misses retained for review: 962
+Positive-label misses retained for review: 939

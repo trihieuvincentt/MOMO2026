@@ -68,6 +68,34 @@ def test_investment_scam_returns_investment_finding():
     assert any(finding.category == "investment_scam" for finding in result.findings)
 
 
+def test_refund_scam_requesting_bank_details_is_detected():
+    text = "Amazon support can process your refund, but we need your bank account and routing number first."
+    result = analyze_message(MessageScanRequest(text=text))
+
+    assert any(finding.category == "financial_information_request" for finding in result.findings)
+
+
+def test_fraud_alert_impersonation_is_detected():
+    text = "This is Visa fraud prevention. We detected suspicious activity. Call this number immediately to protect your card."
+    result = analyze_message(MessageScanRequest(text=text))
+
+    assert any(finding.category == "brand_impersonation" for finding in result.findings)
+
+
+def test_normal_refund_discussion_is_not_a_financial_information_request():
+    text = "The store confirmed my refund was processed yesterday and will arrive in five days."
+    result = analyze_message(MessageScanRequest(text=text))
+
+    assert not any(finding.category == "financial_information_request" for finding in result.findings)
+
+
+def test_gift_card_winner_claim_is_detected_as_prize_scam():
+    text = "You are the lucky winner of a $1,000 gift card. Call now to claim your consumer prize."
+    result = analyze_message(MessageScanRequest(text=text))
+
+    assert any(finding.category == "prize_claim" for finding in result.findings)
+
+
     try:
         MessageScanRequest(text="   ")
     except ValueError:

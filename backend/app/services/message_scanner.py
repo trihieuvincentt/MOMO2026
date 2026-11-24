@@ -40,13 +40,23 @@ _INVESTMENT = re.compile(
     re.I,
 )
 _PRIZE_CLAIM = re.compile(
-    r".{0,120}(?:chúc mừng|trúng giải|giải nhất|giải thưởng|may mắn).{0,180}"
-    r"(?:xe máy|phiếu quà tặng|tiền mặt|vnđ|website|truy cập ngay|nhận thưởng).{0,120}",
+    r".{0,120}(?:chúc mừng|trúng giải|giải nhất|giải thưởng|may mắn|lucky winner|winner).{0,180}"
+    r"(?:xe máy|phiếu quà tặng|tiền mặt|vnđ|website|truy cập ngay|nhận thưởng|gift card|consumer prize|claim).{0,120}",
     re.I,
 )
 _BRAND_IMPERSONATION = re.compile(
-    r".{0,100}(?:facebook|m[obi]{1,2}fone|zalo|ngân hàng|bank).{0,160}"
-    r"(?:chúc mừng|trúng giải|tài khoản.*(?:khóa|suspended|deactivated)|xác minh|verify|truy cập ngay).{0,120}",
+    r".{0,100}(?:facebook|m[obi]{1,2}fone|zalo|ng[aâ]n h[aà]ng|bank).{0,160}"
+    r"(?:ch[uú]c m[uừ]ng|tr[uú]ng gi[aả]i|t[aà]i kho[aả]n.*(?:kh[oó]a|suspended|deactivated)|x[aá]c minh|verify|truy c[aậ]p ngay).{0,120}",
+    re.I,
+)
+_FINANCIAL_INFORMATION = re.compile(
+    r".{0,120}(?:refund|reimburse|reembolso|ho[aà]n ti[eề]n).{0,140}"
+    r"(?:bank account|routing number|account number|s[oố] t[aà]i kho[aả]n|th[oô]ng tin ng[aâ]n h[aà]ng).{0,120}",
+    re.I,
+)
+_FRAUD_ALERT = re.compile(
+    r".{0,100}(?:visa|mastercard|amazon|paypal|social security|bank).{0,160}"
+    r"(?:fraud|suspicious activity|compromised|gian l[aậ]n|b[aấ]t th[uư][oờ]ng).{0,160}",
     re.I,
 )
 
@@ -74,6 +84,8 @@ def analyze_message(request: MessageScanRequest) -> MessageScanResult:
         (_INVESTMENT, "investment_scam", "The message promises unusually high or guaranteed investment returns.", Severity.HIGH),
         (_PRIZE_CLAIM, "prize_claim", "The message appears to promise an unexpected prize and direct the recipient to claim it.", Severity.HIGH),
         (_BRAND_IMPERSONATION, "brand_impersonation", "The message appears to use a brand or institution identity in a suspicious claim or verification request.", Severity.HIGH),
+        (_FINANCIAL_INFORMATION, "financial_information_request", "The message requests bank or payment information under a refund or reimbursement pretext.", Severity.HIGH),
+        (_FRAUD_ALERT, "brand_impersonation", "The message uses a brand or institution identity to create a suspicious fraud alert.", Severity.HIGH),
     ):
         match = pattern.search(request.text)
         if match:
