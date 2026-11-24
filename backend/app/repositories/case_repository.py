@@ -95,3 +95,18 @@ class PostgresCaseRepository:
             return Case.model_validate(payload)
         finally:
             connection.close()
+
+    def list_cases(self) -> list[Case]:
+        connection = self._open_connection()
+        try:
+            cursor = connection.cursor()
+            self._ensure_schema(cursor)
+            cursor.execute("SELECT payload FROM scamguard_cases")
+            rows = cursor.fetchall()
+            cursor.close()
+            cases = []
+            for (payload,) in rows:
+                cases.append(Case.model_validate_json(payload) if isinstance(payload, str) else Case.model_validate(payload))
+            return cases
+        finally:
+            connection.close()

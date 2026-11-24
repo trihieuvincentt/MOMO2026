@@ -40,6 +40,9 @@ class InMemoryCaseRepository:
             raise KeyError(case_id)
         return deepcopy(self._cases[case_id])
 
+    def list_cases(self) -> list[Case]:
+        return [deepcopy(case) for case in self._cases.values()]
+
     def clear(self) -> None:
         self._cases.clear()
 
