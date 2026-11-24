@@ -9,6 +9,8 @@ _PHONE_RE = re.compile(r"(?<!\d)(?:\+84|0)(?:[ .-]?\d){8,10}(?!\d)")
 _AMOUNT_RE = re.compile(r"(?<!\d)(\d{1,3}(?:[.,]\d{3})+|\d+)(?:\s*)(VNĐ|VND|đ|USD|\$)(?!\w)", re.IGNORECASE)
 _BRANDS = ("facebook", "mobifone", "mobi fone", "zalo", "vietcombank", "techcombank")
 _PRIZE_TERMS = ("trúng giải", "giải nhất", "giải thưởng", "chúc mừng", "may mắn")
+_CREDENTIAL_TERMS = ("otp", "one-time password", "password", "mật khẩu", "recovery code", "mã xác thực")
+_SUSPENSION_TERMS = ("account will be suspended", "tài khoản sẽ bị khóa", "tài khoản sẽ bị đình chỉ", "account suspended")
 
 
 def _artifact(kind: ArtifactType, value: str, source_id: str, confidence: float = 0.9) -> ScamArtifact:
@@ -64,6 +66,12 @@ def extract_artifacts(evidence: list[EvidenceItem]) -> list[ScamArtifact]:
                 candidates.append(_artifact(ArtifactType.BRAND, brand, item.id, 0.8))
         if any(term in lower_text for term in _PRIZE_TERMS) and any(term in lower_text for term in ("xe máy", "phiếu quà tặng", "tiền mặt", "website", "truy cập")):
             candidates.append(_artifact(ArtifactType.SCAM_PATTERN, "prize_claim", item.id, 0.95))
+        if any(term in lower_text for term in _CREDENTIAL_TERMS):
+            candidates.append(_artifact(ArtifactType.SCAM_PATTERN, "credential_request", item.id, 0.95))
+        if any(term in lower_text for term in _SUSPENSION_TERMS):
+            candidates.append(_artifact(ArtifactType.SCAM_PATTERN, "account_suspension", item.id, 0.9))
+        if any(term in lower_text for term in ("urgent", "khẩn cấp")) and any(term in lower_text for term in _SUSPENSION_TERMS):
+            candidates.append(_artifact(ArtifactType.DISTINCTIVE_PHRASE, "urgent account suspension", item.id, 0.85))
         for phrase in ("mã số may mắn", "truy cập ngay", "lucky code"):
             if phrase in lower_text:
                 candidates.append(_artifact(ArtifactType.DISTINCTIVE_PHRASE, phrase, item.id, 0.85))

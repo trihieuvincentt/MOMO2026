@@ -41,6 +41,23 @@ def test_normalizes_urls_and_phones_and_deduplicates():
     assert len(artifacts) == len({(a.type, a.normalized_value, a.source_evidence_id) for a in artifacts})
 
 
+def test_extracts_credential_and_account_suspension_patterns():
+    evidence = [
+        EvidenceItem(
+            id="e-message",
+            type=EvidenceType.MESSAGE,
+            content_reference="URGENT! Send your OTP and password now or your bank account will be suspended.",
+        )
+    ]
+
+    artifacts = extract_artifacts(evidence)
+    values = {(artifact.type, artifact.normalized_value) for artifact in artifacts}
+
+    assert ("scam_pattern", "credential_request") in values
+    assert ("scam_pattern", "account_suspension") in values
+    assert ("distinctive_phrase", "urgent account suspension") in values
+
+
 def test_does_not_extract_sensitive_credential_values():
     evidence = [
         EvidenceItem(
