@@ -46,6 +46,7 @@ class ResourceLimits:
 @dataclass(frozen=True)
 class BrowserSecurityPolicy:
     navigation_timeout_ms: int = 15_000
+    max_screenshot_bytes: int = 8 * 1024 * 1024
     max_pages: int = 6
     max_external_targets: int = 5
     max_depth: int = 1

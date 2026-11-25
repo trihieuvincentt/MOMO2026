@@ -13,7 +13,8 @@ RUN apt-get update \
 
 COPY --from=ghcr.io/astral-sh/uv:0.13.4 /uv /uvx /bin/
 COPY pyproject.toml uv.lock ./
-RUN uv sync --locked --no-dev --extra ocr
+RUN uv sync --locked --no-dev --extra ocr --extra browser
+RUN uv run --no-sync playwright install --with-deps chromium
 
 COPY backend ./backend
 COPY frontend ./frontend
