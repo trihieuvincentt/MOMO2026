@@ -84,6 +84,18 @@ Do not use a real banking, login, payment or personal account URL as a test targ
 - PostgreSQL repository cleanup exists, but a recurring scheduler is not configured by this change. Run cleanup through an approved operational schedule before enabling sustained public traffic.
 - No finding or cache hit is a guarantee that a website is safe or unchanged.
 
+## External cache cleanup scheduler
+
+Run the one-shot cleanup command from the ScamGuard project environment:
+
+```bash
+uv run --no-sync python -m backend.app.jobs.cleanup_website_cache
+```
+
+The command requires `DATABASE_URL`, runs once, and exits. It does not start a FastAPI worker or fall back to the in-memory cache. Configure it as an external scheduled job (for example, a Render Cron Job, Linux cron, GitHub Actions schedule, or Windows Task Scheduler) with the environment's `DATABASE_URL` supplied securely. Do not print the variable or include it in command history or logs.
+
+An hourly cadence is sufficient for the default 24-hour cache TTL. Configure separate schedules and credentials for staging and production. Alert or retry on a non-zero exit status; a successful run emits only sanitized operational status.
+
 ## Failure handling
 
 | Symptom | Safe response |
