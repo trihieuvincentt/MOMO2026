@@ -67,5 +67,8 @@ class _PlaywrightPage:
     def screenshot(self, *, full_page: bool) -> bytes:
         return self._page.screenshot(full_page=full_page, type="png")
 
+    def content(self) -> str:
+        return self._page.content()
+
     def close(self) -> None:
         self._page.close()

@@ -21,6 +21,9 @@ class FakePage:
         assert full_page is True
         return b"PNG"
 
+    def content(self):
+        return "<html><title>Example</title></html>"
+
     def close(self):
         self.closed = True
 
@@ -66,6 +69,7 @@ def test_capture_returns_metadata_and_always_closes_browser_resources():
     assert snapshot.status_code == 200
     assert snapshot.title == "Example"
     assert snapshot.screenshot_bytes == b"PNG"
+    assert snapshot.html == "<html><title>Example</title></html>"
     assert context.accept_downloads is False
     assert page.closed is True
     assert context.closed is True

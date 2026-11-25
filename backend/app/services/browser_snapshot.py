@@ -23,6 +23,7 @@ class BrowserSnapshot:
     status_code: int | None
     title: str
     screenshot_bytes: bytes
+    html: str
     redirect_chain: tuple[str, ...]
     content_type: str | None = None
 
@@ -33,6 +34,7 @@ class SnapshotPage(Protocol):
     def goto(self, url: str, *, timeout_ms: int) -> int | None: ...
     def title(self) -> str: ...
     def screenshot(self, *, full_page: bool) -> bytes: ...
+    def content(self) -> str: ...
     def close(self) -> None: ...
 
 
@@ -117,6 +119,7 @@ class BrowserSnapshotService:
                 status_code=status_code,
                 title=page.title(),
                 screenshot_bytes=screenshot,
+                html=page.content(),
                 redirect_chain=(observation.normalized_url, page.url or observation.normalized_url),
             )
         except BrowserSnapshotError:
