@@ -76,6 +76,26 @@ def test_capture_returns_metadata_and_always_closes_browser_resources():
     assert service.factory is not None
 
 
+def test_capture_rechecks_redirected_hostname_resolution_before_browser_navigation():
+    page = FakePage(url="http://127.0.0.1/private")
+    context = FakeContext(page)
+    resolver_calls = []
+
+    def resolver(hostname):
+        resolver_calls.append(hostname)
+        return ["93.184.216.34"] if hostname == "example.com" else ["127.0.0.1"]
+
+    service = BrowserSnapshotService(
+        factory=FakeFactory(context),
+        resolver=resolver,
+    )
+
+    with pytest.raises(BrowserSnapshotError, match="private"):
+        service.capture("https://example.com")
+
+    assert resolver_calls == ["example.com", "127.0.0.1"]
+
+
 def test_capture_rejects_private_target_before_starting_browser():
     class ExplodingFactory:
         def new_context(self, *, accept_downloads):

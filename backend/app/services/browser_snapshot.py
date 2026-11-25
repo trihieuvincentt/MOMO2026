@@ -109,18 +109,27 @@ class BrowserSnapshotService:
                 observation.normalized_url,
                 timeout_ms=self.browser_policy.navigation_timeout_ms,
             )
+            final_url = page.url or observation.normalized_url
+            try:
+                validate_fetch_target(
+                    final_url,
+                    policy=self.url_policy,
+                    resolver=self.resolver,
+                )
+            except URLSecurityError as exc:
+                raise BrowserSnapshotError(str(exc)) from exc
             screenshot = page.screenshot(full_page=True)
             if len(screenshot) > self.browser_policy.max_screenshot_bytes:
                 raise BrowserSnapshotError("screenshot exceeds the allowed limit")
             return BrowserSnapshot(
                 requested_url=raw_url.strip(),
                 normalized_url=observation.normalized_url,
-                final_url=page.url or observation.normalized_url,
+                final_url=final_url,
                 status_code=status_code,
                 title=page.title(),
                 screenshot_bytes=screenshot,
                 html=page.content(),
-                redirect_chain=(observation.normalized_url, page.url or observation.normalized_url),
+                redirect_chain=(observation.normalized_url, final_url),
             )
         except BrowserSnapshotError:
             raise
