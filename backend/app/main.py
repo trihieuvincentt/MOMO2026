@@ -10,6 +10,7 @@ from backend.app.api.routes.ocr import router as ocr_router
 from backend.app.api.routes.links import router as links_router
 from backend.app.api.routes.visual import router as visual_router
 from backend.app.api.routes.evidence import router as evidence_router
+from backend.app.api.routes.websites import router as websites_router
 from backend.app.api.routes.url import router as url_router
 
 app = FastAPI(title="ScamGuard API", version="0.1.0")
@@ -20,6 +21,7 @@ app.include_router(ocr_router)
 app.include_router(links_router)
 app.include_router(visual_router)
 app.include_router(evidence_router)
+app.include_router(websites_router)
 
 _FRONTEND_DIR = Path(__file__).resolve().parents[2] / "frontend"
 if _FRONTEND_DIR.is_dir():

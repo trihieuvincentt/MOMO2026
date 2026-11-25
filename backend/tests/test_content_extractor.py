@@ -44,7 +44,7 @@ def test_extracts_sensitive_form_fields_without_values():
 
 def test_malformed_and_unsupported_links_are_ignored():
     result = extract_website_content(
-        '<script>secret = "do not show"</script><style>.x{}</style><a href="javascript:void(0)">JS</a><a href="mailto:a@example.com">Mail</a><a href="/ok">OK</a>',
+        '<script>secret = "do not show"</script><style>.x{}</style><a href="javascript:void(0)">JS</a><a href="mailto:a@example.com">Mail</a><a href="data:text/html,bad">Data</a><a href="ftp://files.example.com/file">FTP</a><a href="/ok">OK</a>',
         base_url="https://example.com",
     )
 

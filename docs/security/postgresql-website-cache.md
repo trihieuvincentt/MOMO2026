@@ -12,7 +12,9 @@ Milestone 7 adds PostgreSQL-backed reuse for website analysis and a graph store 
 - `cleanup_expired()` removes entries whose TTL has elapsed.
 - `WebsiteAnalysisCache` provides a default TTL and a `force_reanalysis` bypass.
 
-The cache payload is structured analysis data, not an API key, credential, raw form value, or hidden model reasoning.
+The website investigation workflow now performs cache lookup before browser capture, bypasses the cache when `force_reanalysis` is requested, and saves the website, links, and fused analysis graph. Cache context includes claimed brands so a result based on different brand claims is not reused. The cache stores extracted metadata and risk reasons, but omits full rendered visible text, raw HTML, and screenshot bytes.
+
+Screenshots and raw HTML are not persisted by this workflow. The cache payload is structured analysis data, not an API key, credential, raw form value, raw page body, or hidden model reasoning.
 
 ## Website graph
 
@@ -26,13 +28,13 @@ Links use a composite source/target key so repeated extraction updates the relat
 
 ## Reuse policy
 
-The eventual website orchestration flow should:
+The website investigation flow at `POST /api/v1/websites/analyze`:
 
-1. normalize the URL;
-2. check the cache;
-3. reuse a non-expired structured result unless `force_reanalysis` is requested;
-4. run Browser Snapshot, extraction, link analysis, visual analysis, and fusion only on a miss;
-5. write website, links, and analysis results;
-6. run periodic expiry cleanup.
+1. normalizes the URL and checks cache before browser startup;
+2. reuses an unexpired result when its claimed-brand context matches;
+3. bypasses cache on `force_reanalysis: true`;
+4. on a miss, runs Browser Snapshot, extraction, link analysis, optional Visual Gemini analysis, and evidence fusion;
+5. stores the structured result and, when PostgreSQL is configured, upserts website, links, and fused analysis graph;
+6. returns `cache_hit` so the UI can distinguish reused results.
 
-Screenshots and raw HTML should receive shorter retention than compact structured results. Cleanup policy should be added before public demo traffic is enabled.
+The in-memory fallback has a 24-hour TTL and key normalization. A scheduled cleanup job is still an operational follow-up; the repository exposes `cleanup_expired()` for it. The current workflow does not persist screenshot bytes or raw HTML. Cache payload omits the full visible-text field, although it retains extracted titles, link labels/URLs, form field names, visual indicators, and risk reasons.

@@ -30,7 +30,8 @@
     <nav class="tabs" aria-label="Investigation tools">
       <button class="tab active" data-tab="message">Message scanner <span>01</span></button>
       <button class="tab" data-tab="url">URL reputation <span>02</span></button>
-      <button class="tab" data-tab="ocr">Screenshot OCR <span>03</span></button>
+      <button class="tab" data-tab="website">Website investigation <span>03</span></button>
+      <button class="tab" data-tab="ocr">Screenshot OCR <span>04</span></button>
     </nav>
 
     <section id="message-panel" class="tool-panel active" data-panel="message">
@@ -48,6 +49,18 @@
         <label for="url-input">Suspicious URL</label>
         <input id="url-input" type="url" placeholder="https://example.com" required maxlength="2048">
         <div class="form-footer"><span class="privacy-note">⌁ Multi-source reputation lookup.</span><button class="primary-button" type="submit">Check URL <span>→</span></button></div>
+      </form>
+    </section>
+
+    <section id="website-panel" class="tool-panel" data-panel="website" hidden>
+      <div class="panel-heading"><div class="icon orange">⌁</div><div><p class="kicker">WEBSITE INVESTIGATION</p><h3>See the whole web signal.</h3><p>Capture the rendered page, inspect content and links, then combine evidence into an explainable risk assessment.</p></div></div>
+      <form id="website-form" class="scan-form">
+        <label for="website-input">Website URL</label>
+        <input id="website-input" type="url" placeholder="https://example.com" required maxlength="2048">
+        <label for="brand-input" style="margin-top:14px">Claimed brands <span style="font-weight:500;color:var(--muted)">(optional, comma separated)</span></label>
+        <input id="brand-input" type="text" placeholder="Example Bank, Facebook" maxlength="500">
+        <label class="force-recheck" for="website-force"><input id="website-force" type="checkbox"> Force a fresh analysis (bypass cache)</label>
+        <div class="form-footer"><span class="privacy-note">⌁ Cached structured results may be reused until expiry.</span><button class="primary-button" type="submit">Investigate website <span>→</span></button></div>
       </form>
     </section>
 

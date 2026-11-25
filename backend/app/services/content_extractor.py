@@ -112,7 +112,9 @@ class _ContentParser(HTMLParser):
                 self.images.append(ExtractedImage(urljoin(self.base_url, attrs["src"]), attrs.get("alt", "").strip()))
         elif tag == "a":
             href = attrs.get("href", "")
-            if href and not href.lower().startswith(("javascript:", "mailto:", "tel:", "#")):
+            resolved = urljoin(self.base_url, href) if href else ""
+            scheme = urlsplit(resolved).scheme.lower()
+            if resolved and scheme in {"http", "https"}:
                 self._link_text = []
                 self._link_attrs = attrs
 
