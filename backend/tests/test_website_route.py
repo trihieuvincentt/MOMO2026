@@ -60,6 +60,45 @@ def test_website_service_enables_gemini_visual_when_configured(monkeypatch):
     assert service.visual_service.analyzer.model_name == "gemini-test"
 
 
+def test_website_route_enforces_per_peer_rate_limit(monkeypatch):
+    from backend.app.services.request_limits import SlidingWindowRateLimiter
+
+    monkeypatch.setattr(websites, "website_rate_limiter", SlidingWindowRateLimiter(max_requests=1, window_seconds=60, clock=lambda: 1.0))
+    monkeypatch.setattr(
+        websites,
+        "get_website_investigation_service",
+        lambda: SimpleNamespace(analyze=lambda url, **kwargs: {"cache_hit": False, "fusion": {"category": "caution"}}),
+    )
+
+    first = client.post("/api/v1/websites/analyze", json={"url": "https://example.com"})
+    second = client.post("/api/v1/websites/analyze", json={"url": "https://example.com"})
+
+    assert first.status_code == 200
+    assert second.status_code == 429
+    assert second.headers["retry-after"]
+
+
+def test_website_route_returns_busy_when_concurrency_capacity_is_exhausted(monkeypatch):
+    from backend.app.services.request_limits import RateLimitExceeded
+
+    class BusyGate:
+        def run(self, operation, *args, **kwargs):
+            raise RateLimitExceeded(2)
+
+    monkeypatch.setattr(websites, "website_concurrency_gate", BusyGate())
+    monkeypatch.setattr(websites, "website_rate_limiter", websites.SlidingWindowRateLimiter(max_requests=10))
+    monkeypatch.setattr(
+        websites,
+        "get_website_investigation_service",
+        lambda: SimpleNamespace(analyze=lambda url, **kwargs: {"cache_hit": False}),
+    )
+
+    response = client.post("/api/v1/websites/analyze", json={"url": "https://example.com"})
+
+    assert response.status_code == 429
+    assert response.headers["retry-after"] == "2"
+
+
 def test_memory_cache_expires_entries_and_normalizes_keys():
     cache = websites.InMemoryWebsiteCache(ttl_hours=1)
     cache.put("https://EXAMPLE.com#frag", {"risk": "low"})

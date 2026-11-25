@@ -2,6 +2,20 @@ from backend.app.services.evidence_fusion import EvidenceFusionResult, FusionRea
 from backend.app.services.fusion_risk_adapter import fusion_to_risk_assessment
 
 
+def test_no_known_signal_still_recommends_independent_verification():
+    fusion = EvidenceFusionResult(
+        category="no_known_signal_found",
+        score=0,
+        reasons=[],
+        limitations=["No match is not proof of safety."],
+    )
+
+    risk = fusion_to_risk_assessment(fusion)
+
+    assert risk.recommendations
+    assert "independently" in risk.recommendations[0].action.lower()
+
+
 def test_fusion_to_risk_assessment_preserves_reasons_and_unknowns():
     fusion = EvidenceFusionResult(
         category="high_risk",

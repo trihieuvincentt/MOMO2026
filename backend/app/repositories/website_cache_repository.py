@@ -69,7 +69,6 @@ class WebsiteCacheRepository:
             ON scamguard_websites (expires_at)
             """
         )
-        self._schema_ready = True
 
     def save(self, raw_url: str, payload: dict, *, expires_at: datetime) -> CachedWebsite:
         normalized_url = normalize_cache_url(raw_url)
@@ -87,6 +86,7 @@ class WebsiteCacheRepository:
                 (normalized_url, json.dumps(payload), expires_at),
             )
             connection.commit()
+            self._schema_ready = True
             cursor.close()
             return CachedWebsite(normalized_url, payload, expires_at)
         except Exception:
@@ -101,6 +101,8 @@ class WebsiteCacheRepository:
         try:
             cursor = connection.cursor()
             self._ensure_schema(cursor)
+            connection.commit()
+            self._schema_ready = True
             cursor.execute(
                 "SELECT payload, expires_at FROM scamguard_websites WHERE normalized_url = %s",
                 (normalized_url,),

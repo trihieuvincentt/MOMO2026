@@ -32,18 +32,34 @@ class FakeCursor:
 class FakeConnection:
     def __init__(self, state):
         self.cursor_instance = FakeCursor(state)
+        self.commit_count = 0
 
     def cursor(self):
         return self.cursor_instance
 
     def commit(self):
-        pass
+        self.commit_count += 1
 
     def rollback(self):
         pass
 
     def close(self):
         pass
+
+
+def test_website_cache_commits_schema_created_during_initial_cache_miss():
+    connections = []
+
+    def connect(_):
+        connection = FakeConnection({})
+        connections.append(connection)
+        return connection
+
+    repository = WebsiteCacheRepository("postgresql://fake", connect=connect)
+
+    assert repository.get("https://example.com/") is None
+
+    assert connections[0].commit_count == 1
 
 
 def test_website_cache_reuses_unexpired_analysis():

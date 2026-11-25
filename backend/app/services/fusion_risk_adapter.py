@@ -29,10 +29,14 @@ def fusion_to_risk_assessment(result: EvidenceFusionResult) -> RiskAssessment:
             reason="The combined evidence contains suspicious or verified risk signals.",
             priority=RecommendationPriority.IMMEDIATE,
         ))
-    elif result.category == "insufficient_information":
+    elif result.category in {"insufficient_information", "no_known_signal_found", "caution"}:
         recommendations.append(Recommendation(
-            action="Verify the website through an independently known official channel before proceeding.",
-            reason="The available evidence is incomplete.",
+            action="Verify the website through an independently known official channel before entering information or proceeding.",
+            reason=(
+                "The available evidence is incomplete."
+                if result.category == "insufficient_information"
+                else "No signal or only limited signals were found; this is not proof that the website is safe."
+            ),
             priority=RecommendationPriority.NORMAL,
         ))
     return RiskAssessment(

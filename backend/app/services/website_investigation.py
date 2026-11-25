@@ -3,6 +3,7 @@ from datetime import datetime, timedelta, timezone
 
 from backend.app.services.content_extractor import extract_website_content
 from backend.app.services.evidence_fusion import EvidenceFusionService
+from backend.app.services.fusion_risk_adapter import fusion_to_risk_assessment
 from backend.app.services.link_analyzer import analyze_links
 
 
@@ -44,6 +45,7 @@ class WebsiteInvestigationService:
             links=links,
             reputation_matches=sum(1 for item in links.links if item.reputation_matched),
         )
+        risk_assessment = fusion_to_risk_assessment(fusion)
         content_payload = self._serialize(content)
         # Keep extracted metadata for reuse, but do not retain full rendered page text.
         content_payload.pop("visible_text", None)
@@ -59,6 +61,7 @@ class WebsiteInvestigationService:
             "links": self._serialize(links),
             "visual": self._serialize(visual),
             "fusion": self._serialize(fusion),
+            "risk_assessment": self._serialize(risk_assessment),
             "analysis_context": {"claimed_brands": brands},
             "cache_hit": False,
         }
@@ -87,6 +90,8 @@ class WebsiteInvestigationService:
     def _serialize(cls, value):
         if value is None:
             return None
+        if hasattr(value, "model_dump"):
+            return value.model_dump(mode="json")
         if is_dataclass(value):
             return {key: cls._serialize(item) for key, item in asdict(value).items()}
         if isinstance(value, dict):

@@ -51,6 +51,8 @@ def test_website_workflow_runs_pipeline_and_caches_result():
     assert result["snapshot"]["title"] == "Example"
     assert result["content"]["title"] == "Example"
     assert result["fusion"]["category"] == "no_known_signal_found"
+    assert result["risk_assessment"]["category"] == "no_known_signal_found"
+    assert result["risk_assessment"]["recommendations"]
     assert snapshot.calls == 1
     assert cache.put_calls == 1
     assert "visible_text" not in result["content"]

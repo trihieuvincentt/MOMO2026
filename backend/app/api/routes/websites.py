@@ -1,7 +1,7 @@
 import os
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
 from starlette.concurrency import run_in_threadpool
 
@@ -13,8 +13,15 @@ from backend.app.services.browser_snapshot import BrowserSnapshotError, BrowserS
 from backend.app.services.website_analysis_cache import WebsiteAnalysisCache
 from backend.app.services.website_investigation import WebsiteInvestigationService
 from backend.app.services.visual_analysis import VisualAnalysisService
+from backend.app.services.request_limits import (
+    AnalysisConcurrencyGate,
+    RateLimitExceeded,
+    SlidingWindowRateLimiter,
+)
 
 router = APIRouter(prefix="/api/v1/websites", tags=["websites"])
+website_rate_limiter = SlidingWindowRateLimiter(max_requests=20, window_seconds=60)
+website_concurrency_gate = AnalysisConcurrencyGate(max_concurrent=2, wait_seconds=0.25)
 
 
 class WebsiteAnalysisRequest(BaseModel):
@@ -83,14 +90,31 @@ def get_website_investigation_service() -> WebsiteInvestigationService:
 
 
 @router.post("/analyze")
-async def analyze_website(request: WebsiteAnalysisRequest) -> dict:
+async def analyze_website(request: WebsiteAnalysisRequest, http_request: Request) -> dict:
+    peer_key = http_request.client.host if http_request.client else "unknown"
+    try:
+        website_rate_limiter.check(peer_key)
+    except RateLimitExceeded as exc:
+        raise HTTPException(
+            status_code=429,
+            detail="Website analysis rate limit exceeded",
+            headers={"Retry-After": str(exc.retry_after_seconds)},
+        ) from exc
+    service = get_website_investigation_service()
     try:
         return await run_in_threadpool(
-            get_website_investigation_service().analyze,
+            website_concurrency_gate.run,
+            service.analyze,
             request.url,
             force_reanalysis=request.force_reanalysis,
             claimed_brands=request.claimed_brands,
         )
+    except RateLimitExceeded as exc:
+        raise HTTPException(
+            status_code=429,
+            detail="Website analysis capacity is busy; retry shortly",
+            headers={"Retry-After": str(exc.retry_after_seconds)},
+        ) from exc
     except BrowserSnapshotError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     except ValueError as exc:
