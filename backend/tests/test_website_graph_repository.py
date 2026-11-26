@@ -1,7 +1,24 @@
 from backend.app.repositories.website_graph_repository import WebsiteGraphRepository
 
 
-def test_graph_repository_saves_links_and_analysis_payloads():
+def test_graph_repository_website_upsert_preserves_analysis_payload_fields():
+    state = {"websites": {}, "links": [], "analyses": []}
+    repository = WebsiteGraphRepository("postgresql://fake", connect=lambda _: FakeConnection(state))
+
+    repository.save_website(
+        "https://example.com/",
+        {"snapshot": {"title": "Example"}, "fusion": {"category": "no_known_signal_found"}, "links": {"links": [{"url": "https://iana.org"}] }},
+    )
+    repository.save_website(
+        "https://example.com/",
+        {"snapshot": {"title": "Example"}, "analysis_context": {"claimed_brands": []}},
+    )
+
+    stored = state["websites"]["https://example.com/"]
+    assert stored["fusion"]["category"] == "no_known_signal_found"
+    assert stored["links"]["links"]
+
+
     state = {"websites": {}, "links": [], "analyses": []}
     repository = WebsiteGraphRepository("postgresql://fake", connect=lambda _: FakeConnection(state))
 
@@ -23,7 +40,9 @@ class FakeCursor:
             return
         if "INSERT INTO scamguard_websites" in sql:
             import json
-            self.state["websites"][params[0]] = json.loads(params[1])
+            incoming = json.loads(params[1])
+            existing = self.state["websites"].get(params[0], {})
+            self.state["websites"][params[0]] = {**existing, **incoming}
         elif "INSERT INTO scamguard_website_links" in sql:
             import json
             self.state["links"].append(json.loads(params[2]))

@@ -82,7 +82,7 @@ class WebsiteGraphRepository:
             """
             INSERT INTO scamguard_websites (normalized_url, payload, expires_at, updated_at)
             VALUES (%s, %s::jsonb, %s, NOW())
-            ON CONFLICT (normalized_url) DO UPDATE SET payload = EXCLUDED.payload,
+            ON CONFLICT (normalized_url) DO UPDATE SET payload = scamguard_websites.payload || EXCLUDED.payload,
             expires_at = EXCLUDED.expires_at, updated_at = NOW()
             """,
             (url, json.dumps(payload), expires_at),
